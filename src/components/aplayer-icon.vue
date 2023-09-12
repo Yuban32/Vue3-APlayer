@@ -1,43 +1,55 @@
 <template>
-  <div class="svg-icon" :class="className">
-    <svg class="icon" :style="style">
-      <use :xlink:href="`#${iconId}`"></use>
-    </svg>
-  </div>
+  <svg
+    :class="`icon ${className}`"
+    :viewBox="svg.viewBox"
+    :p-id="svg.pid"
+    width="100%"
+    height="100%"
+  >
+    <use :xlink:href="`#${iconId}`"></use>
+    <path class="aplayer-icon-fill" :d="svg.d" :p-id="svg.pid"></path>
+  </svg>
 </template>
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 
 const props = defineProps({
   icon: {
     type: String,
     required: true,
   },
-  className: {
-    type: String,
-    default: "",
-  },
-  style: {
-    type: Object,
-    default: () => ({}),
-  },
 });
-const svgContent: Record<string, any> = import.meta.glob(`../assets/*.svg`);
+
+interface ISvg {
+  value: any;
+  d: string;
+  viewBox: string;
+  pid: string;
+}
+const svg: ISvg = ref<any>({});
 const iconId: any = computed(() => {
   return `icon-${props.icon}`;
 });
-// const svgContent: Record<string, any> = import.meta.glob(
-//   `../assets/${props.icon}.svg`
-// );
+const className = computed(() => {
+  return `icon-${props.icon}`;
+});
+const svgContent: any = ref<any>();
+svgContent.value = import.meta.glob(`@/assets/*.svg`);
+Object.keys(svgContent.value).forEach(async (item: any) => {
+  if (item.includes(props.icon)) {
+    const res = await fetch(item)
+      .then((res) => res.text())
+      .then((res) => res);
+    const viewBoxRegex = /viewBox="([^"]+)"/;
+    const dRegex = /<path d="([^"]+)"/;
+    const pidRegex = /p-id="([^"]+)"/;
+    const viewBoxMatch = res.match(viewBoxRegex);
+    const dMatch = res.match(dRegex);
+    const pidMatch = res.match(pidRegex);
 
-// // Parse the SVG content to access <path> element attributes
-// const parser = new DOMParser();
-// const doc = parser.parseFromString(svgContent, "image/svg+xml");
-// const pathElement = doc.querySelector("path");
-// if (pathElement) {
-//   const viewBox = pathElement.getAttribute("viewBox");
-//   const fill = pathElement.getAttribute("fill");
-//   console.log("viewBox:", viewBox);
-//   console.log("fill:", fill);
-// }
+    svg.value.pid = pidMatch ? pidMatch[1] : null;
+    svg.value.viewBox = viewBoxMatch ? viewBoxMatch[1] : null;
+    svg.value.d = dMatch ? dMatch[1] : null;
+  }
+});
 </script>
