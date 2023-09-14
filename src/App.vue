@@ -1,19 +1,16 @@
 <script setup lang="ts">
 import AplayerPlaybackContainer from "./components/aplayer-playback-container.vue";
-import AplayerPlayerLIst from "./components/aplayer-playlist.vue";
 </script>
 
 <template>
-  <div class="aplayer-body">
+  <div>
     <AplayerPlaybackContainer />
-    <AplayerPlayerLIst />
-    <audio />
   </div>
 </template>
 
 <style scoped>
-.aplayer-body {
-  position: relative;
-  height: 100vh;
+* {
+  margin: 0;
+  padding: 0;
 }
 </style>
