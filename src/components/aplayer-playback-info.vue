@@ -18,12 +18,22 @@
           <span class="album">{{ playbackInfo.album }}</span>
         </div>
       </div>
-      <input type="range" class="progress" />
+      <div class="progress-container">
+        <input
+          type="range"
+          class="progress"
+          v-model="progressValue"
+          ref="progressRefs"
+          min="0"
+          max="100"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { nextTick, ref, watch } from "vue";
 import { IPlaybackInfo } from "../types/types";
 import AplayerIcon from "./aplayer-icon.vue";
 withDefaults(defineProps<IPlaybackInfo>(), {
@@ -32,7 +42,20 @@ withDefaults(defineProps<IPlaybackInfo>(), {
     cover: "",
     singer: "暂无",
     album: "暂无",
+    musicURL: "",
   }),
+});
+const progressRefs = ref();
+const progressValue = ref(0);
+
+watch(progressValue, async () => {
+  await nextTick();
+  console.log(123);
+
+  progressRefs.value.style.setProperty(
+    "--percentage",
+    `${progressValue.value}%`
+  );
 });
 </script>
 
@@ -82,6 +105,7 @@ withDefaults(defineProps<IPlaybackInfo>(), {
 }
 .playback-info-container {
   width: 100%;
+  height: 100%;
   font-size: 12px;
   line-height: 1.25;
   font-weight: 600;
@@ -90,6 +114,8 @@ withDefaults(defineProps<IPlaybackInfo>(), {
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  position: relative;
+  overflow: hidden;
 }
 .title {
   width: 100%;
@@ -111,7 +137,7 @@ withDefaults(defineProps<IPlaybackInfo>(), {
   position: absolute;
   left: 5px;
 }
-input[type="range"] {
+.progress {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -119,20 +145,53 @@ input[type="range"] {
   height: 3px;
   display: block;
   border: 0;
-  background-color: transparent;
+  /* background-color: #808080; */
+  background: linear-gradient(
+    to right,
+    #7f7f7f 0%,
+    #7f7f7f var(--percentage, 0%),
+    #e5e5e5 var(--percentage, 0%),
+    #e5e5e5 100%
+  );
   cursor: pointer;
-  /* -webkit-appearance: none; */
+  -webkit-appearance: none;
+  -moz-appearance: none;
   box-sizing: content-box;
-  position: relative;
+  position: absolute;
+  bottom: 0;
+  left: 0;
   z-index: 1;
   color: rgb(16, 16, 16);
+  writing-mode: horizontal-tb;
 }
-input[type="range"] {
-  writing-mode: horizontal-tb !important;
+
+.progress::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 5px;
+  height: 13px;
+  background-color: #808080;
+  border: 1px solid #fff;
+  cursor: pointer;
+  z-index: 1;
+  outline: none;
+  opacity: 0;
+  transition: opacity 150ms;
 }
-input[type="range"]::-webkit-slider-thumb {
-  width: 10px;
-  height: 10px;
-  background: #d60017;
+
+.progress ::-moz-range-thumb {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 5px;
+  height: 13px;
+  background-color: #808080;
+  border: 1px solid #fff;
+  cursor: pointer;
+  z-index: 1;
+  outline: none;
+  opacity: 0;
+  transition: opacity 150ms;
 }
 </style>
