@@ -5,3 +5,12 @@
 li {
   list-style: none;
 }
+
+:root {
+  --list-primary-text-color: #000000e0;
+  --list-second-text-color: #0000008f;
+  --list-border-color: #d7d7d7;
+  --primary-key-color: #d60017;
+  --second-key-color: #e3e3e3;
+  --list-transition: 150ms;
+}

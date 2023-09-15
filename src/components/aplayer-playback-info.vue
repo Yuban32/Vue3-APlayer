@@ -12,7 +12,7 @@
     <div class="playback-info-container">
       <div class="title">{{ playbackInfo.music }}</div>
       <div class="info-wrap">
-        <span class="time">1:33</span>
+        <span class="currentTime">{{ playbackInfo.currentTime }}</span>
         <div class="info">
           <span class="singer">{{ playbackInfo.singer }}</span> -
           <span class="album">{{ playbackInfo.album }}</span>
@@ -43,6 +43,8 @@ withDefaults(defineProps<IPlaybackInfo>(), {
     singer: "暂无",
     album: "暂无",
     musicURL: "",
+    durationTime: "00",
+    currentTime: "00",
   }),
 });
 const progressRefs = ref();
@@ -132,7 +134,7 @@ watch(progressValue, async () => {
   width: 100%;
   text-align: center;
 }
-.time {
+.currentTime {
   display: inline-block;
   position: absolute;
   left: 5px;

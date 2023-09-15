@@ -39,6 +39,8 @@ const playbackInfo = reactive<IPlaybackInfoItems>({
   singer: "暂无",
   album: "暂无",
   musicURL: "",
+  durationTime: "144",
+  currentTime: "1",
 });
 const volumeValue = ref(0);
 const volumeRefs = ref();
