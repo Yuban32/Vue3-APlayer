@@ -1,6 +1,6 @@
 <template>
   <svg
-    :class="`icon ${className == undefined ? '' : className} ${classNames}`"
+    :class="`icon ${className}`"
     :viewBox="svg.viewBox"
     :p-id="svg.pid"
     width="100%"
@@ -18,9 +18,6 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  className: {
-    type: String,
-  },
 });
 
 interface ISvg {
@@ -33,7 +30,7 @@ const svg: ISvg = ref<any>({});
 const iconId: any = computed(() => {
   return `icon-${props.icon}`;
 });
-const classNames = computed(() => {
+const className = computed(() => {
   return `icon-${props.icon}`;
 });
 const svgContent: any = ref<any>();
@@ -49,6 +46,7 @@ Object.keys(svgContent.value).forEach(async (item: any) => {
     const viewBoxMatch = res.match(viewBoxRegex);
     const dMatch = res.match(dRegex);
     const pidMatch = res.match(pidRegex);
+
     svg.value.pid = pidMatch ? pidMatch[1] : null;
     svg.value.viewBox = viewBoxMatch ? viewBoxMatch[1] : null;
     svg.value.d = dMatch ? dMatch[1] : null;
