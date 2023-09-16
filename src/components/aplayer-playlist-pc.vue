@@ -75,7 +75,7 @@ const playlist = reactive([
     music: "サマータイムシンデレラ",
     singer: "Ryokuoushoku Shakai",
     musicURL: "",
-    durationTime: "1445",
+    durationTime: "114",
   },
   {
     cover:
@@ -83,15 +83,16 @@ const playlist = reactive([
     music: "サマータイムシンデレラ",
     singer: "Ryokuoushoku Shakai",
     musicURL: "",
-    durationTime: "1445",
+    durationTime: "114",
   },
   {
     cover:
       "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/ae/04/a9/ae04a9e4-52a5-3676-efa3-a73c1b741a4e/4547366636147.jpg/32x32bb-60.jpg",
-    music: "サマータイムシンデレラ",
+    music:
+      "サマータイムシンデレラサマータイムシンデレラサマータイムシンデレラサマータイムシンデレラサマータイムシンデレラ",
     singer: "Ryokuoushoku Shakai",
     musicURL: "",
-    durationTime: "1445",
+    durationTime: "11:34",
   },
 ]);
 </script>
@@ -101,10 +102,13 @@ const playlist = reactive([
   padding: 20px 10px 20px 10px;
   width: 280px;
   min-height: calc(100vh - 95px);
-  border-left: 0.5px solid rgba(0, 0, 0, 0.1);
+  border-left: 0.5px solid var(--list-border-color);
   background-color: rgba(253, 253, 253, 0.8);
   position: absolute;
+  top: 0;
   right: 0;
+  white-space: nowrap;
+  overflow-x: hidden;
 }
 .header {
   padding-bottom: 12px;
@@ -123,6 +127,8 @@ const playlist = reactive([
   letter-spacing: 0;
   line-height: 1.33338;
   color: var(--primary-key-color);
+  user-select: none;
+  cursor: pointer;
 }
 .playlist-container {
   border-bottom: 1px solid var(--list-border-color);
@@ -165,8 +171,15 @@ const playlist = reactive([
 .playlist-item:last-child .playlist-content {
   border: none;
 }
+.playlist-content-left > p {
+  width: 170px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .playlist-content-right {
   position: relative;
+  height: 100%;
 }
 
 .playlist-content-right .menu {
@@ -176,6 +189,10 @@ const playlist = reactive([
 }
 .playlist-content-right span {
   position: absolute;
+  width: 35px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   right: 0;
   top: 50%;
   transform: translateY(-50%);

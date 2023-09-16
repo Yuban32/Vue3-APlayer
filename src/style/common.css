@@ -13,4 +13,44 @@ li {
   --primary-key-color: #d60017;
   --second-key-color: #e3e3e3;
   --list-transition: 150ms;
+  --pageBG: #ffffff;
+  --lyric-primary-color: #ffffffeb;
+  --lyric-second-color: #ffffffa3;
+}
+a,
+blockquote,
+body,
+code,
+dd,
+div,
+dl,
+dt,
+embed,
+fieldset,
+footer,
+form,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+header,
+html,
+img,
+legend,
+li,
+ol,
+p,
+pre,
+section,
+table,
+td,
+th,
+ul {
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
