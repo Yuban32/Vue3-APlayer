@@ -21,17 +21,33 @@
         min="0"
         max="100"
       />
-      <APlayerIcon icon="queue-button" className="queue-button" />
+      <div
+        :class="`queue-button-wrap ${
+          isExpandPlayList ? 'queue-button-active' : ''
+        }`"
+      >
+        <APlayerIcon
+          icon="queue-button"
+          className="queue-button"
+          @click="sendPlayListStatus"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, reactive, ref, watch } from "vue";
+//vue
+import { reactive, ref } from "vue";
+//components
 import APlayBackControls from "./aplayer-playback-controls.vue";
 import APlayBackInfo from "./aplayer-playback-info.vue";
 import APlayerIcon from "./aplayer-icon.vue";
+//types
 import { IPlaybackInfoItems } from "../types/types";
+
+//hooks
+import { useVolumeIcons } from "../hooks/useVolumeIcons";
 
 const playbackInfo = reactive<IPlaybackInfoItems>({
   music: "21312",
@@ -42,30 +58,23 @@ const playbackInfo = reactive<IPlaybackInfoItems>({
   durationTime: "144",
   currentTime: "1",
 });
-const volumeValue = ref(0);
+const emit = defineEmits(["playListStatus"]);
+
 const volumeRefs = ref();
-watch(volumeValue, async () => {
-  await nextTick();
-  volumeRefs.value.style.setProperty("--percentage", `${volumeValue.value}%`);
-});
-const handleVolumeIcon = computed(() => {
-  let icons = "";
-  if (volumeValue.value > 50) {
-    icons = "volume-2";
-  } else if (volumeValue.value <= 50 && volumeValue.value > 0) {
-    icons = "volume-1";
-  } else if (volumeValue.value == 0) {
-    icons = "volume-mute";
-  }
-  return icons;
-});
+const { handleVolumeIcon, volumeValue } = useVolumeIcons(volumeRefs);
+let isExpandPlayList = ref(false);
+const sendPlayListStatus = () => {
+  isExpandPlayList.value = !isExpandPlayList.value;
+  emit("playListStatus", isExpandPlayList.value);
+};
 </script>
 
 <style scoped>
 .aplayer-playback-container-wrap {
   height: 54px;
   width: 100vw;
-  border-top: 1px solid #e8e8e8;
+  background-color: var(--pageBG);
+  border-top: 1px solid var(--list-border-color);
   display: flex;
   position: absolute;
   bottom: 0;
@@ -92,15 +101,35 @@ const handleVolumeIcon = computed(() => {
 }
 ::v-deep(.icon-volume) {
   fill: #707070;
-  width: 32px;
-  height: 28px;
+  width: 27px;
+  height: 23px;
 }
 .volume,
 .queue-button {
   fill: #707070;
+  width: 27px;
+  height: 23px;
+  cursor: pointer;
+  transition: fill 0.2s;
+}
+.queue-button-wrap {
+  margin-left: 5px;
+  border-radius: 4px;
   width: 32px;
   height: 28px;
-  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* background-color: #6c6c6c; */
+}
+.queue-button-active {
+  background-color: #6c6c6c;
+}
+.queue-button-active .queue-button {
+  fill: #ffffff;
+}
+.queue-button-active .icon:hover ::v-deep(.aplayer-icon-fill) {
+  fill: #ffffff;
 }
 .volume-progress {
   width: 70px;
@@ -142,5 +171,11 @@ const handleVolumeIcon = computed(() => {
   cursor: pointer;
   z-index: 1;
   outline: none;
+}
+::v-deep(.aplayer-icon-fill) {
+  transition: fill 0.2s;
+}
+.icon:hover ::v-deep(.aplayer-icon-fill) {
+  fill: #1f1f1f;
 }
 </style>
