@@ -1,3 +1,17 @@
+<template>
+  <div class="aplayer-body">
+    <!-- <AplayerPlayBackContainer
+      @playListStatus="handlePlayListStatus"
+      ref="aplayerPlayBackContainerRef"
+    /> -->
+    <AplayerLyric />
+    <Transition name="aplay-list">
+      <AplayerPlayListPC v-show="playListStatus" />
+    </Transition>
+    <audio />
+  </div>
+</template>
+
 <script setup lang="ts">
 import { provide, ref } from "vue";
 import AplayerPlayBackContainer from "./components/aplayer-playback-container.vue";
@@ -27,30 +41,10 @@ const handlePlayListStatus = (value: boolean) => {
   playListStatus.value = value;
 };
 </script>
-
-<template>
-  <div class="aplayer-body">
-    <AplayerPlayBackContainer
-      @playListStatus="handlePlayListStatus"
-      ref="aplayerPlayBackContainerRef"
-    />
-    <AplayerLyric />
-    <Transition name="aplay-list">
-      <AplayerPlayListPC v-show="playListStatus" />
-    </Transition>
-    <audio />
-  </div>
-</template>
-
 <style scoped>
 .aplayer-body {
   position: relative;
   height: 100vh;
-  /* background: radial-gradient(
-    circle,
-    rgba(238, 174, 202, 1) 0%,
-    rgba(148, 187, 233, 1) 100%
-  ); */
 }
 /* transition animation */
 .aplay-list-enter-active,

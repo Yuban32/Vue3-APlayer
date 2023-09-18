@@ -1,11 +1,14 @@
 <template>
   <div class="aplayer-lyric-wrap">
+    <div class="bg" ref="bg"></div>
     <div class="lyric-controls-wrap">
       <div class="lyric-controls">
         <div class="lyric-controls-cover-wrap">
           <img
-            src="https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/fe/58/79/fe58795c-1628-230a-9ffe-300c04b6627c/194491717186.jpg/450x450bb-60.jpg"
+            id="image"
+            src="../assets/cover-test.png"
             alt="cover"
+            ref="img"
           />
           <!-- <AplayerIcon icon="music" /> -->
         </div>
@@ -23,11 +26,11 @@
           </p>
         </div>
         <div class="lyric-controls-icons">
-          <APlayerIcon icon="shuffle" />
+          <APlayerIcon icon="shuffle" className="repeat-icons" />
           <APlayerIcon icon="backward" />
           <APlayerIcon icon="play" />
           <APlayerIcon icon="forward" />
-          <APlayerIcon icon="repeat" />
+          <APlayerIcon icon="repeat-one" className="repeat-icons" />
         </div>
         <div class="lyric-controls-volume-progress-wrap">
           <APlayerIcon
@@ -53,13 +56,21 @@
 
 <script setup lang="ts">
 //vue
-import { ref } from "vue";
+import { nextTick, ref } from "vue";
 //components
 import APlayerIcon from "./aplayer-icon.vue";
 //hooks
 import { useVolumeIcons } from "../hooks/useVolumeIcons";
 
+const img = ref<HTMLImageElement>();
 const volumeRefs = ref();
+const bg = ref<HTMLDivElement>();
+nextTick(() => {
+  (
+    bg.value?.style as CSSStyleDeclaration
+  ).backgroundImage = `url(${img.value?.src})`;
+});
+
 const { handleVolumeIcon, volumeValue } = useVolumeIcons(volumeRefs);
 </script>
 
@@ -68,17 +79,34 @@ const { handleVolumeIcon, volumeValue } = useVolumeIcons(volumeRefs);
   width: 100vw;
   height: 100vh;
   position: absolute;
-  /* background: linear-gradient(180deg, transparent, #000 80px, #000 50%); */
-  background: radial-gradient(
-    circle,
-    rgba(238, 174, 202, 1) 0%,
-    rgba(148, 187, 233, 1) 100%
-  );
-  z-index: 99;
+  z-index: -1;
   display: flex;
   justify-content: center;
   align-items: center;
   white-space: nowrap;
+  overflow: hidden;
+}
+.bg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  filter: blur(10px);
+  background: #c7c7c7;
+  animation: BGrotate infinite 9s linear forwards;
+  background-position: center center;
+  background-repeat: no-repeat;
+  z-index: -1;
+}
+@keyframes BGrotate {
+  0% {
+    transform: rotate(0deg) scale(7);
+  }
+  50% {
+    transform: rotate(182.5deg) scale(15);
+  }
+  100% {
+    transform: rotate(365deg) scale(7);
+  }
 }
 .aplayer-lyric-wrap .lyric-controls-wrap {
   flex: 1;
@@ -104,6 +132,7 @@ const { handleVolumeIcon, volumeValue } = useVolumeIcons(volumeRefs);
   justify-content: center;
   border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0px 5px 20px 1px #1616166e;
 }
 .lyric-controls-wrap .lyric-controls-cover-wrap img {
   aspect-ratio: auto 600 / 600;
@@ -125,17 +154,28 @@ const { handleVolumeIcon, volumeValue } = useVolumeIcons(volumeRefs);
 }
 
 /* icons */
-
+.lyric-controls-icons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .icon {
-  width: 32px;
-  height: 28px;
+  width: 50px;
+  cursor: pointer;
+}
+.icon-play {
+  width: 55px;
+  height: 55px;
 }
 ::v-deep(.aplayer-icon-fill) {
-  fill: #707070;
-  transition: fill 0.2s;
+  fill: #ffffcc;
+  transition: fill 0.5s;
+}
+.repeat-icons {
+  height: 28px;
 }
 .icon:hover ::v-deep(.aplayer-icon-fill) {
-  fill: #1f1f1f;
+  fill: #ffffff;
 }
 
 .aplayer-lyric-wrap .lyric-content-wrap {
