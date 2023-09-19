@@ -1,28 +1,37 @@
 <template>
   <div class="aplayer-lyric-wrap">
     <div class="bg" ref="bg"></div>
+    <div class="close-lyric-view">
+      <APlayerIcon icon="close" @click="sendCloseLyricStatus" />
+    </div>
     <div class="lyric-controls-wrap">
       <div class="lyric-controls">
         <div class="lyric-controls-cover-wrap">
           <img
             id="image"
-            src="../assets/cover-test.png"
+            :src="props.currentMusicData.cover"
             alt="cover"
             ref="img"
+            v-if="props.currentMusicData.cover != ''"
           />
-          <!-- <AplayerIcon icon="music" /> -->
+          <APlayerIcon icon="music" v-else />
         </div>
         <div class="lyric-controls-music-info">
-          <p class="music-title">夜に駆ける</p>
+          <p class="music-title">{{ props.currentMusicData.music }}</p>
           <p class="singer">
-            YOASOBI - <span class="album">夜に駆ける - Single</span>
+            {{ props.currentMusicData.singer }} -
+            <span class="album">{{ props.currentMusicData.album }}</span>
           </p>
         </div>
         <div class="lyric-controls-music-progress-bar-wrap">
           <input type="range" class="music-progress-bar progress" />
           <p>
-            <span class="currentTime">1:33</span>
-            <span class="durationTime">2:33</span>
+            <span class="currentTime">{{
+              props.currentMusicData.currentTime
+            }}</span>
+            <span class="durationTime">{{
+              props.currentMusicData.durationTime
+            }}</span>
           </p>
         </div>
         <div class="lyric-controls-icons">
@@ -61,6 +70,11 @@ import { nextTick, ref } from "vue";
 import APlayerIcon from "./aplayer-icon.vue";
 //hooks
 import { useVolumeIcons } from "../hooks/useVolumeIcons";
+//types
+import { IPlaybackInfo } from "../types/types";
+
+const props = defineProps<IPlaybackInfo>();
+console.log(props.currentMusicData);
 
 const img = ref<HTMLImageElement>();
 const volumeRefs = ref();
@@ -68,9 +82,12 @@ const bg = ref<HTMLDivElement>();
 nextTick(() => {
   (
     bg.value?.style as CSSStyleDeclaration
-  ).backgroundImage = `url(${img.value?.src})`;
+  ).backgroundImage = `url(${props.currentMusicData.cover})`;
 });
-
+const emit = defineEmits(["closeLyric"]);
+const sendCloseLyricStatus = () => {
+  emit("closeLyric", true);
+};
 const { handleVolumeIcon, volumeValue } = useVolumeIcons(volumeRefs);
 </script>
 
@@ -79,7 +96,6 @@ const { handleVolumeIcon, volumeValue } = useVolumeIcons(volumeRefs);
   width: 100vw;
   height: 100vh;
   position: absolute;
-  z-index: -1;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -108,6 +124,16 @@ const { handleVolumeIcon, volumeValue } = useVolumeIcons(volumeRefs);
     transform: rotate(365deg) scale(7);
   }
 }
+.close-lyric-view {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 20px;
+}
+.icon.icon-close {
+  width: 18px;
+  height: 18px;
+}
 .aplayer-lyric-wrap .lyric-controls-wrap {
   flex: 1;
   display: flex;
@@ -127,18 +153,29 @@ const { handleVolumeIcon, volumeValue } = useVolumeIcons(volumeRefs);
 }
 .lyric-controls-wrap .lyric-controls-cover-wrap {
   width: 100%;
+  height: 450px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0px 5px 20px 1px #1616166e;
+  background-color: var(--lyric-primary-color);
 }
 .lyric-controls-wrap .lyric-controls-cover-wrap img {
   aspect-ratio: auto 600 / 600;
   width: 100%;
   height: 100%;
   border-radius: inherit;
+}
+.lyric-controls-wrap .lyric-controls-cover-wrap .icon-music {
+  aspect-ratio: auto 600 / 600;
+  width: 200px;
+  border-radius: inherit;
+  cursor: auto;
+}
+::v-deep(.icon-music .aplayer-icon-fill) {
+  fill: #cccccd;
 }
 .lyric-controls-wrap .lyric-controls-music-info {
   padding-top: 10px;

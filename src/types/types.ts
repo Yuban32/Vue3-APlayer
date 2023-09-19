@@ -7,17 +7,20 @@ export interface IPlaybackInfoItems {
   durationTime: string;
   currentTime: string;
 }
-export interface Items {
+export interface IMusicListItems {
   music: string;
   cover: string;
   singer: string;
-  album: string;
   musicURL: string;
   durationTime: string;
 }
-export interface IMusicDataList {
-  data?: Items[];
-}
 export interface IPlaybackInfo {
-  playbackInfo: IPlaybackInfoItems;
+  currentMusicData: IPlaybackInfoItems;
+}
+export interface IAplayerData {
+  musicDataList: IMusicListItems[];
+  currentMusicData: IPlaybackInfoItems;
+}
+export interface IMusicListData {
+  musicDataList: IMusicListItems[];
 }

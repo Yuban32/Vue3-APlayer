@@ -4,10 +4,17 @@
       <span>待播清单</span>
       <span>清除</span>
     </div>
-    <div class="playlist-container">
-      <ul>
+    <div
+      :class="
+        props.musicDataList.length == 0
+          ? 'playlist-container dont-has-music-list'
+          : 'playlist-container'
+      "
+    >
+      <p v-if="props.musicDataList.length == 0">无待播歌曲。</p>
+      <ul v-else>
         <li
-          v-for="(item, index) in playlist"
+          v-for="(item, index) in props.musicDataList"
           :key="index"
           class="playlist-item"
           :tabindex="index"
@@ -34,7 +41,9 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, reactive, ref } from "vue";
+import { nextTick, ref } from "vue";
+import { IMusicListData } from "../types/types";
+const props = defineProps<IMusicListData>();
 
 //handle play list focus and blur
 const playListItem = ref();
@@ -44,66 +53,40 @@ const resetClassName = (element: HTMLElement[]) => {
     item.classList.remove("focus");
   });
 };
-nextTick(() => {
-  playListItem.value.forEach((item: HTMLElement) => {
-    item.addEventListener(
-      "focus",
-      (event: FocusEvent) => {
-        const target = event.target as HTMLElement;
-        resetClassName(playListItem.value);
-        target.classList.add("focus");
-      },
-      true
-    );
-    item.addEventListener(
-      "blur",
-      (event: FocusEvent) => {
-        const target = event.target as HTMLElement;
-        resetClassName(playListItem.value);
-        target.classList.add("blur");
-      },
-      true
-    );
+if (props.musicDataList?.length) {
+  nextTick(() => {
+    playListItem.value.forEach((item: HTMLElement) => {
+      item.addEventListener(
+        "focus",
+        (event: FocusEvent) => {
+          const target = event.target as HTMLElement;
+          resetClassName(playListItem.value);
+          target.classList.add("focus");
+        },
+        true
+      );
+      item.addEventListener(
+        "blur",
+        (event: FocusEvent) => {
+          const target = event.target as HTMLElement;
+          resetClassName(playListItem.value);
+          target.classList.add("blur");
+        },
+        true
+      );
+    });
   });
-});
-
-//fake data
-const playlist = reactive([
-  {
-    cover:
-      "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/ae/04/a9/ae04a9e4-52a5-3676-efa3-a73c1b741a4e/4547366636147.jpg/32x32bb-60.jpg",
-    music: "サマータイムシンデレラ",
-    singer: "Ryokuoushoku Shakai",
-    musicURL: "",
-    durationTime: "114",
-  },
-  {
-    cover:
-      "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/ae/04/a9/ae04a9e4-52a5-3676-efa3-a73c1b741a4e/4547366636147.jpg/32x32bb-60.jpg",
-    music: "サマータイムシンデレラ",
-    singer: "Ryokuoushoku Shakai",
-    musicURL: "",
-    durationTime: "114",
-  },
-  {
-    cover:
-      "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/ae/04/a9/ae04a9e4-52a5-3676-efa3-a73c1b741a4e/4547366636147.jpg/32x32bb-60.jpg",
-    music:
-      "サマータイムシンデレラサマータイムシンデレラサマータイムシンデレラサマータイムシンデレラサマータイムシンデレラ",
-    singer: "Ryokuoushoku Shakai",
-    musicURL: "",
-    durationTime: "11:34",
-  },
-]);
+}
 </script>
 
 <style scoped>
 .aplayer-playlist-wrap {
-  padding: 20px 10px 20px 10px;
+  padding: 20px 20px 20px 20px;
   width: 280px;
   min-height: calc(100vh - 95px);
+  max-height: calc(100vh - 95px);
   border-left: 0.5px solid var(--list-border-color);
-  background-color: rgba(253, 253, 253, 0.8);
+  background-color: #fdfdfdcc;
   position: absolute;
   top: 0;
   right: 0;
@@ -120,6 +103,7 @@ const playlist = reactive([
   font-weight: 600;
   letter-spacing: 0;
   line-height: 1.29412;
+  color: var(--list-primary-text-color);
 }
 .header span:last-child {
   font-size: 15px;
@@ -133,6 +117,22 @@ const playlist = reactive([
 .playlist-container {
   border-bottom: 1px solid var(--list-border-color);
   border-top: 1px solid var(--list-border-color);
+}
+.playlist-container.dont-has-music-list {
+  width: 280px;
+  min-height: calc(100vh - 129px);
+  border-bottom: none;
+  border-top: none;
+  display: flex;
+  justify-items: center;
+  align-items: center;
+  text-align: center;
+}
+.playlist-container.dont-has-music-list p {
+  width: 280px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--list-second-text-color);
 }
 .playlist-item {
   width: calc(100% - 20px);
@@ -172,6 +172,7 @@ const playlist = reactive([
   border: none;
 }
 .playlist-content-left > p {
+  /* color: inherit; */
   width: 170px;
   white-space: nowrap;
   overflow: hidden;
@@ -224,6 +225,12 @@ const playlist = reactive([
   border: none;
 }
 .focus .menu {
+  color: #fff;
+}
+.focus .playlist-music-title {
+  color: #fff;
+}
+.focus .playlist-music-singer {
   color: #fff;
 }
 </style>
