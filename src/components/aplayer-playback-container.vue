@@ -1,10 +1,19 @@
 <template>
   <div class="aplayer-playback-container-wrap">
     <div class="player-controls">
-      <APlayBackControls />
+      <div class="playback-controls">
+        <AplayerIcon icon="shuffle" />
+        <AplayerIcon icon="backward" />
+        <AplayerIcon icon="play" @click="emitPlayStatus" />
+        <AplayerIcon icon="forward" />
+        <AplayerIcon icon="repeat" />
+      </div>
     </div>
     <div class="player-info-container">
-      <APlayBackInfo :playbackInfo="playbackInfo" />
+      <APlayBackInfo
+        :currentMusicData="props.currentMusicData"
+        @aplayerLyricStatus="handleAplayerLyricStatus"
+      />
     </div>
     <div class="player-meta-controls">
       <APlayerIcon
@@ -38,27 +47,23 @@
 
 <script setup lang="ts">
 //vue
-import { reactive, ref } from "vue";
+import { ref } from "vue";
 //components
-import APlayBackControls from "./aplayer-playback-controls.vue";
+import AplayerIcon from "./aplayer-icon.vue";
 import APlayBackInfo from "./aplayer-playback-info.vue";
 import APlayerIcon from "./aplayer-icon.vue";
 //types
-import { IPlaybackInfoItems } from "../types/types";
+import { IAplayerData } from "../types/types";
 
 //hooks
 import { useVolumeIcons } from "../hooks/useVolumeIcons";
 
-const playbackInfo = reactive<IPlaybackInfoItems>({
-  music: "21312",
-  cover: "",
-  singer: "暂无",
-  album: "暂无",
-  musicURL: "",
-  durationTime: "144",
-  currentTime: "1",
-});
-const emit = defineEmits(["playListStatus"]);
+const props = defineProps<IAplayerData>();
+const emit = defineEmits([
+  "playListStatus",
+  "onPlayStatusBtn",
+  "aplayerLyricStatus",
+]);
 
 const volumeRefs = ref();
 const { handleVolumeIcon, volumeValue } = useVolumeIcons(volumeRefs);
@@ -66,6 +71,10 @@ let isExpandPlayList = ref(false);
 const sendPlayListStatus = () => {
   isExpandPlayList.value = !isExpandPlayList.value;
   emit("playListStatus", isExpandPlayList.value);
+};
+const emitPlayStatus = () => {};
+const handleAplayerLyricStatus = (value: boolean) => {
+  emit("aplayerLyricStatus", value);
 };
 </script>
 
@@ -125,7 +134,7 @@ const sendPlayListStatus = () => {
 .queue-button-active {
   background-color: #6c6c6c;
 }
-.queue-button-active .queue-button {
+.queue-button-active .queue-button::v-deep(.aplayer-icon-fill) {
   fill: #ffffff;
 }
 .queue-button-active .icon:hover ::v-deep(.aplayer-icon-fill) {
@@ -173,6 +182,19 @@ const sendPlayListStatus = () => {
   outline: none;
 }
 ::v-deep(.aplayer-icon-fill) {
+  transition: fill 0.2s;
+}
+
+.playback-controls {
+  display: flex;
+}
+.icon {
+  width: 32px;
+  height: 28px;
+  cursor: pointer;
+}
+::v-deep(.aplayer-icon-fill) {
+  fill: #707070;
   transition: fill 0.2s;
 }
 .icon:hover ::v-deep(.aplayer-icon-fill) {

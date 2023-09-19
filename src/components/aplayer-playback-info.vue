@@ -2,20 +2,30 @@
   <div class="playback-info-wrap">
     <div class="album-cover">
       <img
-        v-if="playbackInfo.cover != '' ? playbackInfo.cover : false"
-        :src="playbackInfo.cover"
+        v-if="
+          props.currentMusicData.cover != ''
+            ? props.currentMusicData.cover
+            : false
+        "
+        :src="props.currentMusicData.cover"
         alt="cover"
       />
       <AplayerIcon v-else icon="music" class="icons" />
-      <AplayerIcon icon="expand" class="icons expand" />
+      <AplayerIcon
+        icon="expand"
+        class="icons expand"
+        @click="sendAplayerLyricStatus"
+      />
     </div>
     <div class="playback-info-container">
-      <div class="title">{{ playbackInfo.music }}</div>
+      <div class="title">{{ props.currentMusicData.music }}</div>
       <div class="info-wrap">
-        <span class="currentTime">{{ playbackInfo.currentTime }}</span>
+        <span class="currentTime">{{
+          props.currentMusicData.currentTime
+        }}</span>
         <div class="info">
-          <span class="singer">{{ playbackInfo.singer }}</span> -
-          <span class="album">{{ playbackInfo.album }}</span>
+          <span class="singer">{{ props.currentMusicData.singer }}</span> -
+          <span class="album">{{ props.currentMusicData.album }}</span>
         </div>
       </div>
       <div class="progress-container">
@@ -36,24 +46,19 @@
 import { nextTick, ref, watch } from "vue";
 import { IPlaybackInfo } from "../types/types";
 import AplayerIcon from "./aplayer-icon.vue";
-withDefaults(defineProps<IPlaybackInfo>(), {
-  playbackInfo: () => ({
-    music: "暂无歌曲",
-    cover: "",
-    singer: "暂无",
-    album: "暂无",
-    musicURL: "",
-    durationTime: "00",
-    currentTime: "00",
-  }),
-});
+const props = defineProps<IPlaybackInfo>();
+
 const progressRefs = ref();
 const progressValue = ref(0);
 
+const emit = defineEmits(["aplayerLyricStatus"]);
+const sendAplayerLyricStatus = () => {
+  emit("aplayerLyricStatus", true);
+};
+
+//适配Audio进度条
 watch(progressValue, async () => {
   await nextTick();
-  console.log(123);
-
   progressRefs.value.style.setProperty(
     "--percentage",
     `${progressValue.value}%`
@@ -69,12 +74,15 @@ watch(progressValue, async () => {
 }
 ::v-deep(.icon-expand) {
   opacity: 0;
-  fill: #fff;
   width: 41px;
   height: 41px;
-  background-color: #d2d2d285;
+  background-color: #d2d2d29c;
   transform: rotateX(180deg);
   transition: all 150ms;
+  cursor: pointer;
+}
+::v-deep(.icon-expand .aplayer-icon-fill) {
+  fill: #fff;
 }
 .playback-info-wrap {
   display: flex;

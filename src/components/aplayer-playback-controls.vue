@@ -17,6 +17,7 @@ import AplayerIcon from "./aplayer-icon.vue";
 .icon {
   width: 32px;
   height: 28px;
+  cursor: pointer;
 }
 ::v-deep(.aplayer-icon-fill) {
   fill: #707070;

@@ -9,9 +9,9 @@ export const useVolumeIcons = (volumeRefs: Ref<HTMLElement>) => {
   });
   const handleVolumeIcon = computed(() => {
     let icons = "";
-    if (volumeValue.value > 50) {
+    if (volumeValue.value > 60) {
       icons = "volume-2";
-    } else if (volumeValue.value <= 50 && volumeValue.value > 0) {
+    } else if (volumeValue.value <= 60 && volumeValue.value > 0) {
       icons = "volume-1";
     } else if (volumeValue.value == 0) {
       icons = "volume-mute";

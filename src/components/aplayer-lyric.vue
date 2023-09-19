@@ -1,33 +1,45 @@
 <template>
   <div class="aplayer-lyric-wrap">
+    <div class="bg" ref="bg"></div>
+    <div class="close-lyric-view">
+      <APlayerIcon icon="close" @click="sendCloseLyricStatus" />
+    </div>
     <div class="lyric-controls-wrap">
       <div class="lyric-controls">
         <div class="lyric-controls-cover-wrap">
           <img
-            src="https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/fe/58/79/fe58795c-1628-230a-9ffe-300c04b6627c/194491717186.jpg/450x450bb-60.jpg"
+            id="image"
+            :src="props.currentMusicData.cover"
             alt="cover"
+            ref="img"
+            v-if="props.currentMusicData.cover != ''"
           />
-          <!-- <AplayerIcon icon="music" /> -->
+          <APlayerIcon icon="music" v-else />
         </div>
         <div class="lyric-controls-music-info">
-          <p class="music-title">夜に駆ける</p>
+          <p class="music-title">{{ props.currentMusicData.music }}</p>
           <p class="singer">
-            YOASOBI - <span class="album">夜に駆ける - Single</span>
+            {{ props.currentMusicData.singer }} -
+            <span class="album">{{ props.currentMusicData.album }}</span>
           </p>
         </div>
         <div class="lyric-controls-music-progress-bar-wrap">
           <input type="range" class="music-progress-bar progress" />
           <p>
-            <span class="currentTime">1:33</span>
-            <span class="durationTime">2:33</span>
+            <span class="currentTime">{{
+              props.currentMusicData.currentTime
+            }}</span>
+            <span class="durationTime">{{
+              props.currentMusicData.durationTime
+            }}</span>
           </p>
         </div>
         <div class="lyric-controls-icons">
-          <APlayerIcon icon="shuffle" />
+          <APlayerIcon icon="shuffle" className="repeat-icons" />
           <APlayerIcon icon="backward" />
           <APlayerIcon icon="play" />
           <APlayerIcon icon="forward" />
-          <APlayerIcon icon="repeat" />
+          <APlayerIcon icon="repeat-one" className="repeat-icons" />
         </div>
         <div class="lyric-controls-volume-progress-wrap">
           <APlayerIcon
@@ -53,13 +65,29 @@
 
 <script setup lang="ts">
 //vue
-import { ref } from "vue";
+import { nextTick, ref } from "vue";
 //components
 import APlayerIcon from "./aplayer-icon.vue";
 //hooks
 import { useVolumeIcons } from "../hooks/useVolumeIcons";
+//types
+import { IPlaybackInfo } from "../types/types";
 
+const props = defineProps<IPlaybackInfo>();
+console.log(props.currentMusicData);
+
+const img = ref<HTMLImageElement>();
 const volumeRefs = ref();
+const bg = ref<HTMLDivElement>();
+nextTick(() => {
+  (
+    bg.value?.style as CSSStyleDeclaration
+  ).backgroundImage = `url(${props.currentMusicData.cover})`;
+});
+const emit = defineEmits(["closeLyric"]);
+const sendCloseLyricStatus = () => {
+  emit("closeLyric", true);
+};
 const { handleVolumeIcon, volumeValue } = useVolumeIcons(volumeRefs);
 </script>
 
@@ -68,17 +96,43 @@ const { handleVolumeIcon, volumeValue } = useVolumeIcons(volumeRefs);
   width: 100vw;
   height: 100vh;
   position: absolute;
-  /* background: linear-gradient(180deg, transparent, #000 80px, #000 50%); */
-  background: radial-gradient(
-    circle,
-    rgba(238, 174, 202, 1) 0%,
-    rgba(148, 187, 233, 1) 100%
-  );
-  z-index: 99;
   display: flex;
   justify-content: center;
   align-items: center;
   white-space: nowrap;
+  overflow: hidden;
+}
+.bg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  filter: blur(10px);
+  background: #c7c7c7;
+  animation: BGrotate infinite 9s linear forwards;
+  background-position: center center;
+  background-repeat: no-repeat;
+  z-index: -1;
+}
+@keyframes BGrotate {
+  0% {
+    transform: rotate(0deg) scale(7);
+  }
+  50% {
+    transform: rotate(182.5deg) scale(15);
+  }
+  100% {
+    transform: rotate(365deg) scale(7);
+  }
+}
+.close-lyric-view {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 20px;
+}
+.icon.icon-close {
+  width: 18px;
+  height: 18px;
 }
 .aplayer-lyric-wrap .lyric-controls-wrap {
   flex: 1;
@@ -99,17 +153,29 @@ const { handleVolumeIcon, volumeValue } = useVolumeIcons(volumeRefs);
 }
 .lyric-controls-wrap .lyric-controls-cover-wrap {
   width: 100%;
+  height: 450px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0px 5px 20px 1px #1616166e;
+  background-color: var(--lyric-primary-color);
 }
 .lyric-controls-wrap .lyric-controls-cover-wrap img {
   aspect-ratio: auto 600 / 600;
   width: 100%;
   height: 100%;
   border-radius: inherit;
+}
+.lyric-controls-wrap .lyric-controls-cover-wrap .icon-music {
+  aspect-ratio: auto 600 / 600;
+  width: 200px;
+  border-radius: inherit;
+  cursor: auto;
+}
+::v-deep(.icon-music .aplayer-icon-fill) {
+  fill: #cccccd;
 }
 .lyric-controls-wrap .lyric-controls-music-info {
   padding-top: 10px;
@@ -125,17 +191,28 @@ const { handleVolumeIcon, volumeValue } = useVolumeIcons(volumeRefs);
 }
 
 /* icons */
-
+.lyric-controls-icons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .icon {
-  width: 32px;
-  height: 28px;
+  width: 50px;
+  cursor: pointer;
+}
+.icon-play {
+  width: 55px;
+  height: 55px;
 }
 ::v-deep(.aplayer-icon-fill) {
-  fill: #707070;
-  transition: fill 0.2s;
+  fill: #ffffcc;
+  transition: fill 0.5s;
+}
+.repeat-icons {
+  height: 28px;
 }
 .icon:hover ::v-deep(.aplayer-icon-fill) {
-  fill: #1f1f1f;
+  fill: #ffffff;
 }
 
 .aplayer-lyric-wrap .lyric-content-wrap {
