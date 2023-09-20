@@ -87,7 +87,7 @@ if (props.musicDataList?.length) {
   max-height: calc(100vh - 95px);
   border-left: 0.5px solid var(--list-border-color);
   background-color: #fdfdfdcc;
-  position: absolute;
+  position: fixed;
   top: 0;
   right: 0;
   white-space: nowrap;
@@ -153,6 +153,11 @@ if (props.musicDataList?.length) {
   padding-right: 10px;
   display: flex;
   align-items: center;
+}
+.cover-wrap img {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
 }
 .playlist-music-title {
   color: var(--list-primary-text-color);

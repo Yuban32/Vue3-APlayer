@@ -71,9 +71,9 @@ import APlayerIcon from "./aplayer-icon.vue";
 //hooks
 import { useVolumeIcons } from "../hooks/useVolumeIcons";
 //types
-import { IPlaybackInfo } from "../types/types";
+import { ICurrentMusicData } from "../types/types";
 
-const props = defineProps<IPlaybackInfo>();
+const props = defineProps<ICurrentMusicData>();
 console.log(props.currentMusicData);
 
 const img = ref<HTMLImageElement>();
