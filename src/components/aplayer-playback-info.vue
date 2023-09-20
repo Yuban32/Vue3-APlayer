@@ -44,9 +44,9 @@
 
 <script setup lang="ts">
 import { nextTick, ref, watch } from "vue";
-import { IPlaybackInfo } from "../types/types";
+import { ICurrentMusicData } from "../types/types";
 import AplayerIcon from "./aplayer-icon.vue";
-const props = defineProps<IPlaybackInfo>();
+const props = defineProps<ICurrentMusicData>();
 
 const progressRefs = ref();
 const progressValue = ref(0);
@@ -107,6 +107,9 @@ watch(progressValue, async () => {
   position: relative;
   left: -1px;
   border-radius: 5px;
+}
+.album-cover img {
+  width: 100%;
 }
 .album-cover .icons {
   position: absolute;
