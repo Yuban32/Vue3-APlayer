@@ -24,20 +24,28 @@
           </p>
         </div>
         <div class="lyric-controls-music-progress-bar-wrap">
-          <input type="range" class="music-progress-bar progress" />
+          <input
+            type="range"
+            class="music-progress-bar progress"
+            v-model="progressValue"
+            @input="handleProgressValueInput"
+            ref="progressRefs"
+            min="0"
+            max="100"
+          />
           <p>
-            <span class="currentTime">{{
-              props.currentMusicData.currentTime
-            }}</span>
-            <span class="durationTime">{{
-              props.currentMusicData.durationTime
-            }}</span>
+            <span class="currentTime">{{ currentTime }}</span>
+            <span class="durationTime">{{ durationTime }}</span>
           </p>
         </div>
         <div class="lyric-controls-icons">
           <APlayerIcon icon="shuffle" className="repeat-icons" />
           <APlayerIcon icon="backward" />
-          <APlayerIcon icon="play" />
+          <APlayerIcon
+            :icon="playIcons"
+            @click="emitPlayStatus"
+            :key="playIcons"
+          />
           <APlayerIcon icon="forward" />
           <APlayerIcon icon="repeat-one" className="repeat-icons" />
         </div>
@@ -65,7 +73,7 @@
 
 <script setup lang="ts">
 //vue
-import { nextTick, ref } from "vue";
+import { Ref, inject, nextTick, ref, watch } from "vue";
 //components
 import APlayerIcon from "./aplayer-icon.vue";
 //hooks
@@ -74,8 +82,6 @@ import { useVolumeIcons } from "../hooks/useVolumeIcons";
 import { ICurrentMusicData } from "../types/types";
 
 const props = defineProps<ICurrentMusicData>();
-console.log(props.currentMusicData);
-
 const img = ref<HTMLImageElement>();
 const volumeRefs = ref();
 const bg = ref<HTMLDivElement>();
@@ -84,11 +90,54 @@ nextTick(() => {
     bg.value?.style as CSSStyleDeclaration
   ).backgroundImage = `url(${props.currentMusicData.cover})`;
 });
-const emit = defineEmits(["closeLyric"]);
+const emit = defineEmits([
+  "closeLyric",
+  "updateVolume",
+  "updateCurrentTime",
+  "changePlayStatus",
+]);
 const sendCloseLyricStatus = () => {
   emit("closeLyric", true);
 };
-const { handleVolumeIcon, volumeValue } = useVolumeIcons(volumeRefs);
+//inject
+const currentTime = inject<string>("currentTime");
+const durationTime = inject<string>("durationTime");
+const audioProgressValue = inject<Ref<number>>("audioProgressValue");
+const defaultVolume = inject<number>("defaultVolume");
+
+const { handleVolumeIcon, volumeValue } = useVolumeIcons(
+  volumeRefs,
+  defaultVolume!
+);
+watch(volumeValue, (newValue: any) => {
+  emit("updateVolume", newValue);
+});
+const progressValue = ref<number>(0);
+watch(
+  () => audioProgressValue,
+  (newValue) => {
+    progressValue.value = newValue!.value;
+  },
+  { deep: true }
+);
+const handleProgressValueInput = () => {
+  emit("updateCurrentTime", progressValue);
+};
+const playIcons = ref<string>("play");
+//provide inject
+const injectPlayStatus = inject("playStatus");
+watch(injectPlayStatus, (newValue: any) => {
+  nextTick(() => {
+    if (newValue == "play") {
+      playIcons.value = "pause";
+    } else if (newValue == "pause") {
+      playIcons.value = "play";
+    }
+  });
+});
+const emitPlayStatus = () => {
+  emit("changePlayStatus", playIcons.value);
+};
 </script>
 
 <style scoped>
@@ -145,6 +194,7 @@ const { handleVolumeIcon, volumeValue } = useVolumeIcons(volumeRefs);
 }
 .lyric-controls {
   max-width: 450px;
+  min-width: 450px;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -152,7 +202,8 @@ const { handleVolumeIcon, volumeValue } = useVolumeIcons(volumeRefs);
   align-items: center;
 }
 .lyric-controls-wrap .lyric-controls-cover-wrap {
-  width: 100%;
+  max-width: inherit;
+  min-width: inherit;
   height: 450px;
   display: flex;
   align-items: center;

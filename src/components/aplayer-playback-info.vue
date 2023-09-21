@@ -20,9 +20,7 @@
     <div class="playback-info-container">
       <div class="title">{{ props.currentMusicData.music }}</div>
       <div class="info-wrap">
-        <span class="currentTime">{{
-          props.currentMusicData.currentTime
-        }}</span>
+        <span class="currentTime">{{ currentTime }}</span>
         <div class="info">
           <span class="singer">{{ props.currentMusicData.singer }}</span> -
           <span class="album">{{ props.currentMusicData.album }}</span>
@@ -33,6 +31,7 @@
           type="range"
           class="progress"
           v-model="progressValue"
+          @input="handleProgressValueInput"
           ref="progressRefs"
           min="0"
           max="100"
@@ -43,19 +42,30 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, ref, watch } from "vue";
+import { Ref, inject, nextTick, ref, watch } from "vue";
 import { ICurrentMusicData } from "../types/types";
 import AplayerIcon from "./aplayer-icon.vue";
 const props = defineProps<ICurrentMusicData>();
 
+//inject
+const currentTime = inject<string>("currentTime");
+// const durationTime = inject<string>("durationTime");
+const audioProgressValue = inject<Ref<number>>("audioProgressValue");
 const progressRefs = ref();
-const progressValue = ref(0);
+const progressValue = ref<number>(0);
 
-const emit = defineEmits(["aplayerLyricStatus"]);
+const emit = defineEmits(["aplayerLyricStatus", "updateCurrentTime"]);
 const sendAplayerLyricStatus = () => {
   emit("aplayerLyricStatus", true);
 };
 
+watch(
+  () => audioProgressValue,
+  (newValue) => {
+    progressValue.value = newValue!.value;
+  },
+  { deep: true }
+);
 //适配Audio进度条
 watch(progressValue, async () => {
   await nextTick();
@@ -64,6 +74,9 @@ watch(progressValue, async () => {
     `${progressValue.value}%`
   );
 });
+const handleProgressValueInput = () => {
+  emit("updateCurrentTime", progressValue);
+};
 </script>
 
 <style scoped>

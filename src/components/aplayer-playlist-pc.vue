@@ -31,7 +31,7 @@
             </div>
             <div class="playlist-content-right">
               <span class="menu">···</span>
-              <span class="durationTime">{{ item.durationTime }}</span>
+              <!-- <span class="durationTime">{{ item.durationTime }}</span> -->
             </div>
           </div>
         </li>
