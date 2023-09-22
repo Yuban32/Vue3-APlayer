@@ -52,7 +52,7 @@
 
 <script setup lang="ts">
 //vue
-import { inject, nextTick, ref, watch } from "vue";
+import { inject, ref, watch } from "vue";
 //components
 import AplayerIcon from "./aplayer-icon.vue";
 import APlayBackInfo from "./aplayer-playback-info.vue";
@@ -62,10 +62,9 @@ import { IAplayerData } from "../types/types";
 
 //hooks
 import { useVolumeIcons } from "../hooks/useVolumeIcons";
+import { useChangePlayIcons } from "../hooks/useAudioControlsIcons";
 
 const props = defineProps<IAplayerData>();
-console.log(props.currentMusicData);
-
 const emit = defineEmits([
   "playListStatus",
   "changePlayStatus",
@@ -74,18 +73,9 @@ const emit = defineEmits([
   "updateVolume",
 ]);
 
-const playIcons = ref<string>("play");
 //provide inject
 const injectPlayStatus = inject("playStatus");
-watch(injectPlayStatus, (newValue: any) => {
-  nextTick(() => {
-    if (newValue == "play") {
-      playIcons.value = "pause";
-    } else if (newValue == "pause") {
-      playIcons.value = "play";
-    }
-  });
-});
+const { playIcons } = useChangePlayIcons(injectPlayStatus);
 const volumeRefs = ref();
 const defaultVolume = inject<number>("defaultVolume");
 

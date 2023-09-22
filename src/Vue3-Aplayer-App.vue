@@ -34,6 +34,7 @@
       @play="onPlayHandler"
       @pause="onPauseHandler"
       @seeked="onSeekedHandler"
+      @ended="onEnded"
     />
   </div>
 </template>
@@ -44,7 +45,7 @@ import AplayerPlayBackContainer from "./components/aplayer-playback-container.vu
 import AplayerPlayListPC from "./components/aplayer-playlist-pc.vue";
 import AplayerLyric from "./components/aplayer-lyric.vue";
 import { IMusicListData } from "./types/types";
-import { playTileFormat } from "./utils/utils";
+import { playTimeFormat } from "./utils/utils";
 //Music Data List
 const props = defineProps<IMusicListData>();
 // Init Current Music Data
@@ -62,6 +63,7 @@ if (props.musicDataList.length == 0) {
     singer: "暂无",
     album: "暂无",
     musicURL: "",
+    lyric: "",
   };
 } else {
   currentMusicData.value = copyProps[0];
@@ -74,6 +76,7 @@ if (props.musicDataList.length == 0) {
 const audio: Ref<HTMLAudioElement | null> = ref(null);
 //status pause or play
 const playStatus = ref<string>("pause");
+const isEnded = ref<boolean>(false);
 const onPauseHandler = () => {
   playStatus.value = "pause";
 };
@@ -82,10 +85,17 @@ const onPlayHandler = () => {
 };
 const onSeekedHandler = () => {};
 const Play = () => {
+  if (isEnded.value) {
+    //Resolve the error of the prompt DOMException: The element has no supported source after playback
+    audio.value!.src = currentMusicData.value.musicURL;
+  }
   audio.value!.play();
 };
 const Pause = () => {
   audio.value!.pause();
+};
+const onEnded = () => {
+  isEnded.value = true;
 };
 const updateVolume = (value: number) => {
   audio.value!.volume = value / 100;
@@ -93,12 +103,15 @@ const updateVolume = (value: number) => {
 const currentTime = ref<string>("0 : 00");
 const durationTime = ref<string>("0 : 00");
 const audioProgressValue = ref<number>(0);
-const onTimeUpdate = () => {
-  currentTime.value = playTileFormat(CurrentTime()!);
+const playTimeFormats = () => {
+  currentTime.value = playTimeFormat(CurrentTime()!);
   audioProgressValue.value = Number(
     ((CurrentTime()! / DurationTime()) * 100).toFixed(2)
   );
-  durationTime.value = playTileFormat(DurationTime());
+  durationTime.value = playTimeFormat(DurationTime());
+};
+const onTimeUpdate = () => {
+  playTimeFormats();
 };
 const CurrentTime = (time?: number) => {
   if (time !== undefined) {

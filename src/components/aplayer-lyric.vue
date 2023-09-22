@@ -67,21 +67,43 @@
         </div>
       </div>
     </div>
-    <div class="lyric-content-wrap">没有可显示的歌词。</div>
+    <div class="lyric-content-wrap">
+      <span v-if="props.currentMusicData.lyric == ''">没有可显示的歌词。</span>
+
+      <ul
+        v-else
+        class="lyric-content"
+        :style="{ transform: `translateY(${liTop}px)` }"
+      >
+        <li
+          ref="lyricLi"
+          v-for="(item, index) in lyricArray"
+          :key="index + 1"
+          :class="{ lyricLight: index == lyricIndex }"
+        >
+          {{ item != undefined ? item.lyric : "" }}
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 //vue
-import { Ref, inject, nextTick, ref, watch } from "vue";
+import { Ref, inject, nextTick, onMounted, ref, watch } from "vue";
 //components
 import APlayerIcon from "./aplayer-icon.vue";
 //hooks
 import { useVolumeIcons } from "../hooks/useVolumeIcons";
+import { useChangePlayIcons } from "../hooks/useAudioControlsIcons";
 //types
 import { ICurrentMusicData } from "../types/types";
-
+// import lyric from "../example/lyric.json";
+//utils
+import { parseLyricArray } from "../utils/utils";
 const props = defineProps<ICurrentMusicData>();
+console.log(props);
+
 const img = ref<HTMLImageElement>();
 const volumeRefs = ref();
 const bg = ref<HTMLDivElement>();
@@ -123,21 +145,44 @@ watch(
 const handleProgressValueInput = () => {
   emit("updateCurrentTime", progressValue);
 };
-const playIcons = ref<string>("play");
 //provide inject
 const injectPlayStatus = inject("playStatus");
-watch(injectPlayStatus, (newValue: any) => {
-  nextTick(() => {
-    if (newValue == "play") {
-      playIcons.value = "pause";
-    } else if (newValue == "pause") {
-      playIcons.value = "play";
-    }
-  });
-});
+const { playIcons } = useChangePlayIcons(injectPlayStatus);
+
 const emitPlayStatus = () => {
   emit("changePlayStatus", playIcons.value);
 };
+
+//lyric handle
+
+const lyricLi = ref<any>();
+const lyricArray = parseLyricArray(props.currentMusicData.lyric);
+
+const lyricIndex = ref(0);
+const liTop = ref();
+const handleLyric = () => {
+  document.querySelector("audio")?.addEventListener("timeupdate", async () => {
+    let time = document.querySelector("audio")!.currentTime;
+    await nextTick();
+    for (let i = 0; i < lyricArray.length; i++) {
+      if (i == lyricArray.length - 1) {
+        lyricIndex.value = i;
+        break;
+      }
+      if (time >= lyricArray[i].time && time < lyricArray[i + 1]?.time) {
+        lyricIndex.value = i;
+
+        if (time < lyricArray[i + 1].time != undefined) {
+          liTop.value = -lyricLi.value[i].offsetTop + 152.5;
+        }
+        break;
+      }
+    }
+  });
+};
+onMounted(() => {
+  handleLyric();
+});
 </script>
 
 <style scoped>
@@ -251,7 +296,8 @@ const emitPlayStatus = () => {
   width: 50px;
   cursor: pointer;
 }
-.icon-play {
+.icon-play,
+.icon-pause {
   width: 55px;
   height: 55px;
 }
@@ -268,7 +314,8 @@ const emitPlayStatus = () => {
 
 .aplayer-lyric-wrap .lyric-content-wrap {
   width: 100%;
-  height: 100%;
+  min-width: 400px;
+  height: 400px;
   flex: 1;
   display: flex;
   justify-content: center;
@@ -277,6 +324,7 @@ const emitPlayStatus = () => {
   color: var(--lyric-second-color);
   font-size: 12px;
   line-height: 1.25;
+  overflow: hidden;
 }
 /* progress including volume and music */
 .lyric-controls-volume-progress-wrap,
@@ -340,5 +388,24 @@ const emitPlayStatus = () => {
   cursor: pointer;
   z-index: 1;
   outline: none;
+}
+.lyricLight {
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.8);
+}
+ul {
+  transition: all 0.5s;
+  height: 100%;
+}
+li {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 18px;
+}
+.lyric {
+  overflow: hidden;
+  height: 245px;
+  width: 80%;
+  margin: 0 auto;
+  /* background-color: bisque; */
 }
 </style>

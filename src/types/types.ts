@@ -4,6 +4,7 @@ export interface IMusicListItems {
   singer: string;
   album: string;
   musicURL: string;
+  lyric: any;
 }
 
 export interface ICurrentMusicData {
