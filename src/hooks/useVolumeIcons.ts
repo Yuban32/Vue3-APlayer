@@ -1,8 +1,13 @@
 import { Ref, computed, nextTick, ref, watch } from "vue";
 
-//TODO 尚未完善 后续需要介入AUDIO事件
-export const useVolumeIcons = (volumeRefs: Ref<HTMLElement>) => {
-  const volumeValue = ref<number>(0);
+export const useVolumeIcons = (
+  volumeRefs: Ref<HTMLElement>,
+  defaultVolume: number
+) => {
+  const volumeValue = ref<number>(defaultVolume);
+  nextTick(() => {
+    volumeRefs.value.style.setProperty("--percentage", `${volumeValue.value}%`);
+  });
   watch(volumeValue, async () => {
     await nextTick();
     volumeRefs.value.style.setProperty("--percentage", `${volumeValue.value}%`);

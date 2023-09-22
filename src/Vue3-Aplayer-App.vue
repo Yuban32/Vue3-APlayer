@@ -3,6 +3,9 @@
     <AplayerPlayBackContainer
       @playListStatus="handlePlayListStatus"
       @aplayerLyricStatus="handleAplayerLyricStatus"
+      @changePlayStatus="handleChangePlayStatus"
+      @updateCurrentTime="handleUpdateCurrentTime"
+      @updateVolume="handleUpdateVolume"
       ref="aplayerPlayBackContainerRef"
       :musicDataList="musicDataList"
       :currentMusicData="currentMusicData"
@@ -11,6 +14,9 @@
     <Transition name="aplayer-lyric">
       <AplayerLyric
         :currentMusicData="currentMusicData"
+        @updateVolume="handleUpdateVolume"
+        @changePlayStatus="handleChangePlayStatus"
+        @updateCurrentTime="handleUpdateCurrentTime"
         v-show="aplayerLyricStatus"
         @closeLyric="handleCloseLyricStatus"
       />
@@ -28,26 +34,26 @@
       @play="onPlayHandler"
       @pause="onPauseHandler"
       @seeked="onSeekedHandler"
+      @ended="onEnded"
     />
-    <!-- controls -->
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { Ref, provide, ref } from "vue";
 import AplayerPlayBackContainer from "./components/aplayer-playback-container.vue";
 import AplayerPlayListPC from "./components/aplayer-playlist-pc.vue";
 import AplayerLyric from "./components/aplayer-lyric.vue";
 import { IMusicListData } from "./types/types";
-
+import { playTimeFormat } from "./utils/utils";
 //Music Data List
-// import music1 from "./example/05.ギターと孤独と蒼い惑星.flac";
-// import cover from "./example/cover.jpg";
 const props = defineProps<IMusicListData>();
 // Init Current Music Data
 let copyProps = JSON.stringify(props.musicDataList);
 copyProps = JSON.parse(copyProps);
-console.log(copyProps);
+
+// 暂时 以后可能会写个配置项 由使用者来传入默认的配置
+const defaultVolume = ref<number>(100);
 
 const currentMusicData = ref();
 if (props.musicDataList.length == 0) {
@@ -57,8 +63,7 @@ if (props.musicDataList.length == 0) {
     singer: "暂无",
     album: "暂无",
     musicURL: "",
-    durationTime: "",
-    currentTime: "",
+    lyric: "",
   };
 } else {
   currentMusicData.value = copyProps[0];
@@ -67,21 +72,64 @@ if (props.musicDataList.length == 0) {
 /**
  * Media Event
  */
-const playStatus = ref<boolean>(false);
-const audio = ref();
-const onTimeUpdate = () => {};
+//audio element
+const audio: Ref<HTMLAudioElement | null> = ref(null);
+//status pause or play
+const playStatus = ref<string>("pause");
+const isEnded = ref<boolean>(false);
 const onPauseHandler = () => {
-  playStatus.value = false;
+  playStatus.value = "pause";
 };
 const onPlayHandler = () => {
-  playStatus.value = true;
+  playStatus.value = "play";
 };
 const onSeekedHandler = () => {};
-// provide("musicDataList", musicDataList);
+const Play = () => {
+  if (isEnded.value) {
+    //Resolve the error of the prompt DOMException: The element has no supported source after playback
+    audio.value!.src = currentMusicData.value.musicURL;
+  }
+  audio.value!.play();
+};
+const Pause = () => {
+  audio.value!.pause();
+};
+const onEnded = () => {
+  isEnded.value = true;
+};
+const updateVolume = (value: number) => {
+  audio.value!.volume = value / 100;
+};
+const currentTime = ref<string>("0 : 00");
+const durationTime = ref<string>("0 : 00");
+const audioProgressValue = ref<number>(0);
+const playTimeFormats = () => {
+  currentTime.value = playTimeFormat(CurrentTime()!);
+  audioProgressValue.value = Number(
+    ((CurrentTime()! / DurationTime()) * 100).toFixed(2)
+  );
+  durationTime.value = playTimeFormat(DurationTime());
+};
+const onTimeUpdate = () => {
+  playTimeFormats();
+};
+const CurrentTime = (time?: number) => {
+  if (time !== undefined) {
+    audio.value!.currentTime = (time * DurationTime()) / 100;
+    return;
+  }
+  return audio.value!.currentTime;
+};
+const DurationTime = () => {
+  return audio.value!.duration;
+};
+
 const playListStatus = ref<boolean>(false);
 const aplayerLyricStatus = ref<boolean>(false);
-//"value" default value is false
-//see AplayerPlayBackContainer component
+/**
+ * aplayer playback container emit
+ * see AplayerPlayBackContainer component
+ */
 const handlePlayListStatus = (value: boolean) => {
   playListStatus.value = value;
 };
@@ -94,6 +142,30 @@ const handleAplayerLyricStatus = (value: boolean) => {
 const handleCloseLyricStatus = (value: boolean) => {
   aplayerLyricStatus.value = !value;
 };
+//value === play or pause
+const handleChangePlayStatus = (value: string) => {
+  if (value == "play") {
+    Play();
+  } else if (value == "pause") {
+    Pause();
+  }
+};
+const handleUpdateCurrentTime = (value: Ref<number>) => {
+  if (value.value != CurrentTime()) {
+    CurrentTime(value.value);
+  }
+};
+const handleUpdateVolume = (value: string) => {
+  updateVolume(Number(value));
+};
+/**
+ * provide to multiple components
+ */
+provide("playStatus", playStatus);
+provide("currentTime", currentTime);
+provide("durationTime", durationTime);
+provide("audioProgressValue", audioProgressValue);
+provide("defaultVolume", defaultVolume.value);
 </script>
 <style scoped>
 .aplayer-body {

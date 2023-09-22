@@ -4,7 +4,11 @@
       <div class="playback-controls">
         <AplayerIcon icon="shuffle" />
         <AplayerIcon icon="backward" />
-        <AplayerIcon icon="play" @click="emitPlayStatus" />
+        <AplayerIcon
+          :icon="playIcons"
+          @click="emitPlayStatus"
+          :key="playIcons"
+        />
         <AplayerIcon icon="forward" />
         <AplayerIcon icon="repeat" />
       </div>
@@ -13,6 +17,7 @@
       <APlayBackInfo
         :currentMusicData="props.currentMusicData"
         @aplayerLyricStatus="handleAplayerLyricStatus"
+        @updateCurrentTime="handleUpdateCurrentTime"
       />
     </div>
     <div class="player-meta-controls">
@@ -47,7 +52,7 @@
 
 <script setup lang="ts">
 //vue
-import { ref } from "vue";
+import { inject, ref, watch } from "vue";
 //components
 import AplayerIcon from "./aplayer-icon.vue";
 import APlayBackInfo from "./aplayer-playback-info.vue";
@@ -57,24 +62,43 @@ import { IAplayerData } from "../types/types";
 
 //hooks
 import { useVolumeIcons } from "../hooks/useVolumeIcons";
+import { useChangePlayIcons } from "../hooks/useAudioControlsIcons";
 
 const props = defineProps<IAplayerData>();
 const emit = defineEmits([
   "playListStatus",
-  "onPlayStatusBtn",
+  "changePlayStatus",
   "aplayerLyricStatus",
+  "updateCurrentTime",
+  "updateVolume",
 ]);
 
+//provide inject
+const injectPlayStatus = inject("playStatus");
+const { playIcons } = useChangePlayIcons(injectPlayStatus);
 const volumeRefs = ref();
-const { handleVolumeIcon, volumeValue } = useVolumeIcons(volumeRefs);
+const defaultVolume = inject<number>("defaultVolume");
+
+const { handleVolumeIcon, volumeValue } = useVolumeIcons(
+  volumeRefs,
+  defaultVolume!
+);
+watch(volumeValue, (newValue: any) => {
+  emit("updateVolume", newValue);
+});
 let isExpandPlayList = ref(false);
 const sendPlayListStatus = () => {
   isExpandPlayList.value = !isExpandPlayList.value;
   emit("playListStatus", isExpandPlayList.value);
 };
-const emitPlayStatus = () => {};
+const emitPlayStatus = () => {
+  emit("changePlayStatus", playIcons.value);
+};
 const handleAplayerLyricStatus = (value: boolean) => {
   emit("aplayerLyricStatus", value);
+};
+const handleUpdateCurrentTime = (value: any) => {
+  emit("updateCurrentTime", value);
 };
 </script>
 

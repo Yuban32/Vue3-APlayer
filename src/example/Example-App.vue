@@ -8,6 +8,7 @@
 import Vue3AplayerApp from "../Vue3-Aplayer-App.vue";
 import music from "../example/05.ギターと孤独と蒼い惑星.flac";
 import cover from "../example/cover.jpg";
+import lyric from "./lyric.json";
 const musicDataList = [
   {
     cover: cover,
@@ -16,6 +17,7 @@ const musicDataList = [
     album: "ギターと孤独と蒼い惑星 ",
     musicURL: music,
     durationTime: "114",
+    lyric: lyric,
   },
 ];
 </script>
