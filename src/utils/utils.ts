@@ -27,5 +27,6 @@ export const parseLyricArray = (lyric: any) => {
       };
     }
   });
+  parseLyric = parseLyric.filter((element: any) => element !== undefined);
   return parseLyric;
 };

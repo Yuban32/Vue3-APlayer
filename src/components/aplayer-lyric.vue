@@ -5,7 +5,7 @@
       <APlayerIcon icon="close" @click="sendCloseLyricStatus" />
     </div>
     <div class="lyric-controls-wrap">
-      <div class="lyric-controls">
+      <div class="lyric-controls" v-show="showLyricControlsView">
         <div class="lyric-controls-cover-wrap">
           <img
             id="image"
@@ -67,9 +67,8 @@
         </div>
       </div>
     </div>
-    <div class="lyric-content-wrap">
+    <div class="lyric-content-wrap" v-show="showLyricView">
       <span v-if="props.currentMusicData.lyric == ''">没有可显示的歌词。</span>
-
       <ul
         v-else
         class="lyric-content"
@@ -78,12 +77,19 @@
         <li
           ref="lyricLi"
           v-for="(item, index) in lyricArray"
-          :key="index + 1"
-          :class="{ lyricLight: index == lyricIndex }"
+          :key="index"
+          :class="{
+            lyricLight: index == lyricIndex,
+            hidden: index < lyricIndex == true,
+          }"
+          @click="fastForward(item)"
         >
-          {{ item != undefined ? item.lyric : "" }}
+          {{ item.lyric }}
         </li>
       </ul>
+    </div>
+    <div class="lyric-icon-wrap" @click="handleSHowLyricView">
+      <APlayerIcon icon="lyric" />
     </div>
   </div>
 </template>
@@ -98,15 +104,29 @@ import { useVolumeIcons } from "../hooks/useVolumeIcons";
 import { useChangePlayIcons } from "../hooks/useAudioControlsIcons";
 //types
 import { ICurrentMusicData } from "../types/types";
-// import lyric from "../example/lyric.json";
 //utils
 import { parseLyricArray } from "../utils/utils";
 const props = defineProps<ICurrentMusicData>();
-console.log(props);
-
 const img = ref<HTMLImageElement>();
 const volumeRefs = ref();
 const bg = ref<HTMLDivElement>();
+const showLyricView = ref(true);
+const showLyricControlsView = ref(true);
+//When the screen size is less than 1000px
+const handleSHowLyricView = () => {
+  if (window.innerWidth <= 1000) {
+    showLyricControlsView.value = !showLyricControlsView.value;
+    showLyricView.value = !showLyricView.value;
+  } else if (window.innerWidth > 1000) {
+    showLyricView.value = !showLyricView.value;
+  }
+};
+addEventListener("resize", () => {
+  window.innerWidth < 1000
+    ? (showLyricView.value = false)
+    : (showLyricView.value = true);
+});
+
 nextTick(() => {
   (
     bg.value?.style as CSSStyleDeclaration
@@ -154,7 +174,6 @@ const emitPlayStatus = () => {
 };
 
 //lyric handle
-
 const lyricLi = ref<any>();
 const lyricArray = parseLyricArray(props.currentMusicData.lyric);
 
@@ -173,19 +192,43 @@ const handleLyric = () => {
         lyricIndex.value = i;
 
         if (time < lyricArray[i + 1].time != undefined) {
-          liTop.value = -lyricLi.value[i].offsetTop + 152.5;
+          liTop.value =
+            -lyricLi.value[i].offsetTop + lyricLi.value[i].offsetHeight * 4;
         }
         break;
       }
     }
   });
 };
+
+const fastForward = (item: any) => {
+  let durationTime = document.querySelector("audio")!.duration;
+  let times = (item.time! / durationTime) * 100;
+  // console.log(times);
+
+  emit("updateCurrentTime", ref(times));
+};
+
 onMounted(() => {
   handleLyric();
+  liTop.value = 132;
+  window.innerWidth < 1000
+    ? (showLyricView.value = false)
+    : (showLyricView.value = true);
 });
 </script>
 
 <style scoped>
+.lyric-icon-wrap {
+  position: fixed;
+  bottom: 5px;
+  right: 10px;
+  transform: rotateY(180deg);
+}
+.lyric-icon-wrap ::v-deep(.icon-lyric) {
+  width: 28px;
+  height: 28px;
+}
 .aplayer-lyric-wrap {
   width: 100vw;
   height: 100vh;
@@ -204,6 +247,7 @@ onMounted(() => {
   background: #c7c7c7;
   animation: BGrotate infinite 9s linear forwards;
   background-position: center center;
+  /* background-size: 300px 300px; */
   background-repeat: no-repeat;
   z-index: -1;
 }
@@ -223,6 +267,7 @@ onMounted(() => {
   left: 0;
   top: 0;
   padding: 20px;
+  z-index: 2;
 }
 .icon.icon-close {
   width: 18px;
@@ -311,21 +356,6 @@ onMounted(() => {
 .icon:hover ::v-deep(.aplayer-icon-fill) {
   fill: #ffffff;
 }
-
-.aplayer-lyric-wrap .lyric-content-wrap {
-  width: 100%;
-  min-width: 400px;
-  height: 400px;
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  color: var(--lyric-second-color);
-  font-size: 12px;
-  line-height: 1.25;
-  overflow: hidden;
-}
 /* progress including volume and music */
 .lyric-controls-volume-progress-wrap,
 .lyric-controls-music-progress-bar-wrap {
@@ -389,23 +419,94 @@ onMounted(() => {
   z-index: 1;
   outline: none;
 }
+.aplayer-lyric-wrap .lyric-content-wrap {
+  width: 100%;
+  min-width: 400px;
+  height: 75%;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: var(--lyric-second-color);
+  font-size: 12px;
+  line-height: 1.25;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+}
+.lyric-content-wrap::-webkit-scrollbar {
+  display: none;
+}
+.lyric-content-wrap::-moz-scrollbar {
+  display: none;
+}
+.lyric-content-wrap::-ms-scrollbar {
+  display: none;
+}
+.lyric-content-wrap::-o-scrollbar {
+  display: none;
+}
+.lyric-content {
+  position: relative;
+}
+/* .lyric-content::after {
+  content: "";
+  width: 100%;
+  height: 50px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: yellowgreen;
+} */
 .lyricLight {
-  font-weight: bold;
-  color: rgba(255, 255, 255, 0.8);
+  width: 100%;
+  display: block;
+  color: var(--lyric-primary-color);
+}
+.hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 ul {
   transition: all 0.5s;
   height: 100%;
+  max-width: none;
+  /* overflow-y: hidden; */
 }
 li {
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 18px;
+  color: var(--lyric-second-color);
+  font-size: 28px;
+  white-space: pre-line;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 1s;
+  line-height: 1.1818181818;
+  margin-bottom: 34px;
+  padding-right: 10px;
 }
-.lyric {
-  overflow: hidden;
-  height: 245px;
-  width: 80%;
-  margin: 0 auto;
-  /* background-color: bisque; */
+
+@media only screen and (max-width: 1000px) {
+  .aplayer-lyric-wrap {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .aplayer-lyric-wrap .lyric-content-wrap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: 100vw;
+  }
+  li {
+    padding: 0 20px;
+  }
 }
 </style>
