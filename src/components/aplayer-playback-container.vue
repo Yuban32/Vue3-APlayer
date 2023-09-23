@@ -224,4 +224,21 @@ const handleUpdateCurrentTime = (value: any) => {
 .icon:hover ::v-deep(.aplayer-icon-fill) {
   fill: #1f1f1f;
 }
+@media screen and (max-width: 760px) {
+  .icon-shuffle,
+  .icon-backward,
+  .icon-repeat,
+  .volume,
+  .volume-progress {
+    display: none;
+  }
+  .player-info-container {
+    flex: 5;
+  }
+}
+@media screen and (max-width: 460px) {
+  ::v-deep(.currentTime) {
+    display: none;
+  }
+}
 </style>

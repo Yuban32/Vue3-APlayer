@@ -115,6 +115,8 @@ const onTimeUpdate = () => {
 };
 const CurrentTime = (time?: number) => {
   if (time !== undefined) {
+    console.log(time);
+
     audio.value!.currentTime = (time * DurationTime()) / 100;
     return;
   }
@@ -151,6 +153,8 @@ const handleChangePlayStatus = (value: string) => {
   }
 };
 const handleUpdateCurrentTime = (value: Ref<number>) => {
+  // console.log(value.value);
+
   if (value.value != CurrentTime()) {
     CurrentTime(value.value);
   }
