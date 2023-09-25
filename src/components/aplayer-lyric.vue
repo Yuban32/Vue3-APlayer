@@ -1,6 +1,11 @@
 <template>
   <div class="aplayer-lyric-wrap">
-    <div class="bg" ref="bg"></div>
+    <div class="bg"></div>
+    <div class="bg bg-2"></div>
+    <div class="bg bg-3"></div>
+    <div class="bg bg-4"></div>
+    <div class="bg bg-5"></div>
+    <div class="bg bg-6"></div>
     <div class="close-lyric-view">
       <APlayerIcon icon="close" @click="sendCloseLyricStatus" />
     </div>
@@ -75,7 +80,7 @@
         :style="{ transform: `translateY(${liTop}px)` }"
       >
         <li
-          ref="lyricLi"
+          ref="lyricLiRef"
           v-for="(item, index) in lyricArray"
           :key="index"
           :class="{
@@ -109,7 +114,6 @@ import { parseLyricArray } from "../utils/utils";
 const props = defineProps<ICurrentMusicData>();
 const img = ref<HTMLImageElement>();
 const volumeRefs = ref();
-const bg = ref<HTMLDivElement>();
 const showLyricView = ref(true);
 const showLyricControlsView = ref(true);
 //When the screen size is less than 1000px
@@ -128,9 +132,12 @@ addEventListener("resize", () => {
 });
 
 nextTick(() => {
-  (
-    bg.value?.style as CSSStyleDeclaration
-  ).backgroundImage = `url(${props.currentMusicData.cover})`;
+  let bgs = document.querySelectorAll(".bg");
+  bgs.forEach((item) => {
+    (
+      item as HTMLDivElement
+    ).style.backgroundImage = `url(${props.currentMusicData.cover})`;
+  });
 });
 const emit = defineEmits([
   "closeLyric",
@@ -146,7 +153,9 @@ const currentTime = inject<string>("currentTime");
 const durationTime = inject<string>("durationTime");
 const audioProgressValue = inject<Ref<number>>("audioProgressValue");
 const defaultVolume = inject<number>("defaultVolume");
-
+const onTimeUpdate = inject<Function>("onTimeUpdate");
+const CurrentTime = inject<Function>("CurrentTime");
+const injectPlayStatus = inject("playStatus");
 const { handleVolumeIcon, volumeValue } = useVolumeIcons(
   volumeRefs,
   defaultVolume!
@@ -165,8 +174,6 @@ watch(
 const handleProgressValueInput = () => {
   emit("updateCurrentTime", progressValue);
 };
-//provide inject
-const injectPlayStatus = inject("playStatus");
 const { playIcons } = useChangePlayIcons(injectPlayStatus);
 
 const emitPlayStatus = () => {
@@ -174,15 +181,13 @@ const emitPlayStatus = () => {
 };
 
 //lyric handle
-const lyricLi = ref<any>();
+const lyricLiRef = ref<any>();
 const lyricArray = parseLyricArray(props.currentMusicData.lyric);
-
 const lyricIndex = ref(0);
 const liTop = ref();
 const handleLyric = () => {
-  document.querySelector("audio")?.addEventListener("timeupdate", async () => {
-    let time = document.querySelector("audio")!.currentTime;
-    await nextTick();
+  onTimeUpdate!(() => {
+    let time = CurrentTime!();
     for (let i = 0; i < lyricArray.length; i++) {
       if (i == lyricArray.length - 1) {
         lyricIndex.value = i;
@@ -193,7 +198,8 @@ const handleLyric = () => {
 
         if (time < lyricArray[i + 1].time != undefined) {
           liTop.value =
-            -lyricLi.value[i].offsetTop + lyricLi.value[i].offsetHeight * 4;
+            -lyricLiRef.value[i].offsetTop +
+            lyricLiRef.value[i].offsetHeight * 4;
         }
         break;
       }
@@ -204,8 +210,6 @@ const handleLyric = () => {
 const fastForward = (item: any) => {
   let durationTime = document.querySelector("audio")!.duration;
   let times = (item.time! / durationTime) * 100;
-  // console.log(times);
-
   emit("updateCurrentTime", ref(times));
 };
 
@@ -243,23 +247,69 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   position: absolute;
-  filter: blur(10px);
-  background: #c7c7c7;
-  animation: BGrotate infinite 9s linear forwards;
+  filter: blur(18px);
+  /* background: #c7c7c7; */
+  animation: BGRotate infinite 30s linear forwards;
   background-position: center center;
-  /* background-size: 300px 300px; */
+  background-size: contain;
   background-repeat: no-repeat;
   z-index: -1;
+  border-radius: 35px;
+  overflow: hidden;
 }
-@keyframes BGrotate {
+.bg-2 {
+  max-width: 150px;
+  max-height: 150px;
+  left: 0;
+  bottom: 0;
+  animation: BGRotateAnticlockwise infinite 9s linear forwards;
+}
+.bg-3 {
+  max-width: 150px;
+  max-height: 150px;
+  right: 0;
+  bottom: 0;
+}
+.bg-4 {
+  max-width: 150px;
+  max-height: 150px;
+  right: 0;
+  top: 0;
+  animation: BGRotateAnticlockwise infinite 7s linear forwards;
+}
+.bg-5 {
+  max-width: 150px;
+  max-height: 150px;
+  left: 0;
+  top: 0;
+}
+.bg-6 {
+  width: 120px;
+  height: 120px;
+  right: 50%;
+  top: 50%;
+  animation: BGRotateAnticlockwise infinite 10s linear forwards;
+}
+@keyframes BGRotate {
   0% {
-    transform: rotate(0deg) scale(7);
+    transform: rotate(0deg) scale(3);
   }
   50% {
-    transform: rotate(182.5deg) scale(15);
+    transform: rotate(182.5deg) scale(3);
   }
   100% {
-    transform: rotate(365deg) scale(7);
+    transform: rotate(365deg) scale(3);
+  }
+}
+@keyframes BGRotateAnticlockwise {
+  0% {
+    transform: rotate(0deg) scale(3);
+  }
+  50% {
+    transform: rotate(-182.5deg) scale(3);
+  }
+  100% {
+    transform: rotate(-365deg) scale(3);
   }
 }
 .close-lyric-view {

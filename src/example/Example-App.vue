@@ -1,14 +1,15 @@
 <template>
   <div class="app">
     <Vue3AplayerApp :musicDataList="musicDataList" />
+    <input type="file" id="fileInput" />
   </div>
 </template>
 
 <script setup lang="ts">
 import Vue3AplayerApp from "../Vue3-Aplayer-App.vue";
 import music from "../example/05.ギターと孤独と蒼い惑星.flac";
-import cover from "../example/cover.jpg";
-import cover2 from "../example/cover2.png";
+// import cover from "../example/cover.jpg";
+import cover from "../example/cover2.png";
 import lyric from "./lyric.json";
 
 /**
