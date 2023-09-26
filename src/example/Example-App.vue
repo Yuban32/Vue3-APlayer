@@ -1,17 +1,17 @@
 <template>
   <div class="app">
     <Vue3AplayerApp :musicDataList="musicDataList" />
-    <input type="file" id="fileInput" />
   </div>
 </template>
 
 <script setup lang="ts">
 import Vue3AplayerApp from "../Vue3-Aplayer-App.vue";
-import music from "../example/05.ギターと孤独と蒼い惑星.flac";
-// import cover from "../example/cover.jpg";
-import cover from "../example/cover2.png";
-import lyric from "./lyric.json";
+import lyric1 from "./05.ギターと孤独と蒼い惑星.json";
+import lyric2 from "./Cyua - A Letter.json";
 
+const getAssets = (path: string) => {
+  return new URL(path, import.meta.url).href;
+};
 /**
  * @description MT EN
  * cover : Accept local images or use URLs to use online images
@@ -28,12 +28,20 @@ import lyric from "./lyric.json";
  */
 const musicDataList = [
   {
-    cover: cover,
+    cover: getAssets("./05.ギターと孤独と蒼い惑星2.png"),
     music: "ギターと孤独と蒼い惑星",
     singer: "結束バンド",
-    album: "ギターと孤独と蒼い惑星 ",
-    musicURL: music,
-    lyric: lyric,
+    album: "ギターと孤独と蒼い惑星",
+    musicURL: getAssets("./05.ギターと孤独と蒼い惑星.flac"),
+    lyric: lyric1,
+  },
+  {
+    cover: getAssets("./Cyua - A Letter.png"),
+    music: "A Letter",
+    singer: "Cyua",
+    album: "機動戦士ガンダムUC オリジナル・サウンドトラック",
+    musicURL: getAssets("./Cyua - A Letter.mp3"),
+    lyric: lyric2,
   },
 ];
 </script>

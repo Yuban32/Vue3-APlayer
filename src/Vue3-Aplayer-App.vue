@@ -25,6 +25,7 @@
       <AplayerPlayListPC
         v-show="playListStatus"
         :musicDataList="musicDataList"
+        @updateCurrentPlay="handleUpdateCurrentPlay"
       />
     </Transition>
     <audio
@@ -39,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { Ref, provide, ref } from "vue";
+import { Ref, nextTick, provide, ref } from "vue";
 import AplayerPlayBackContainer from "./components/aplayer-playback-container.vue";
 import AplayerPlayListPC from "./components/aplayer-playlist-pc.vue";
 import AplayerLyric from "./components/aplayer-lyric.vue";
@@ -89,8 +90,8 @@ const {
   currentTime,
   durationTime,
   audioProgressValue,
+  resetPlayTimeFormats,
 } = useAudioEvent(audio, currentMusicData);
-
 const playListStatus = ref<boolean>(false);
 const aplayerLyricStatus = ref<boolean>(false);
 /**
@@ -126,6 +127,13 @@ const handleUpdateCurrentTime = (value: Ref<number>) => {
 };
 const handleUpdateVolume = (value: string) => {
   updateVolume(Number(value));
+};
+const handleUpdateCurrentPlay = async (item: any) => {
+  await nextTick();
+  currentMusicData.value = item;
+  audioProgressValue.value = 0;
+  resetPlayTimeFormats();
+  Play();
 };
 /**
  * provide to multiple components

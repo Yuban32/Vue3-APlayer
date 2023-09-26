@@ -106,8 +106,8 @@ const handleUpdateCurrentTime = (value: any) => {
 .aplayer-playback-container-wrap {
   height: 54px;
   width: 100vw;
-  background-color: var(--pageBG);
-  border-top: 1px solid var(--list-border-color);
+  background-color: var(--aplayer-pageBG);
+  border-top: 1px solid var(--aplayer-list-border-color);
   display: flex;
   position: absolute;
   bottom: 0;
@@ -173,8 +173,8 @@ const handleUpdateCurrentTime = (value: any) => {
   background: linear-gradient(
     to right,
     #7f7f7f 0%,
-    #7f7f7f var(--percentage, 0%),
-    #e5e5e5 var(--percentage, 0%),
+    #7f7f7f var(--aplayer-volumeProgress, 0%),
+    #e5e5e5 var(--aplayer-volumeProgress, 0%),
     #e5e5e5 100%
   );
 }

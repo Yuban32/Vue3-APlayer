@@ -20,6 +20,7 @@
           :tabindex="index"
           :data-index="index"
           ref="playListItem"
+          @dblclick="playCureentMusic(item)"
         >
           <div class="cover-wrap">
             <img :src="item.cover" />
@@ -42,8 +43,10 @@
 
 <script setup lang="ts">
 import { nextTick, ref } from "vue";
-import { IMusicListData } from "../types/types";
+import { IMusicListData, IMusicListItems } from "../types/types";
 const props = defineProps<IMusicListData>();
+
+const emit = defineEmits(["updateCurrentPlay"]);
 
 //handle play list focus and blur
 const playListItem = ref();
@@ -77,6 +80,10 @@ if (props.musicDataList?.length) {
     });
   });
 }
+const playCureentMusic = (item: IMusicListItems) => {
+  // console.log(item.lyric);
+  emit("updateCurrentPlay", item);
+};
 </script>
 
 <style scoped>
@@ -85,7 +92,7 @@ if (props.musicDataList?.length) {
   width: 280px;
   min-height: calc(100vh - 95px);
   max-height: calc(100vh - 95px);
-  border-left: 0.5px solid var(--list-border-color);
+  border-left: 0.5px solid var(--aplayer-list-border-color);
   background-color: #fdfdfdcc;
   position: fixed;
   top: 0;
@@ -103,20 +110,20 @@ if (props.musicDataList?.length) {
   font-weight: 600;
   letter-spacing: 0;
   line-height: 1.29412;
-  color: var(--list-primary-text-color);
+  color: var(--aplayer-list-primary-text-color);
 }
 .header span:last-child {
   font-size: 15px;
   font-weight: 400;
   letter-spacing: 0;
   line-height: 1.33338;
-  color: var(--primary-key-color);
+  color: var(--aplayer-primary-key-color);
   user-select: none;
   cursor: pointer;
 }
 .playlist-container {
-  border-bottom: 1px solid var(--list-border-color);
-  border-top: 1px solid var(--list-border-color);
+  border-bottom: 1px solid var(--aplayer-list-border-color);
+  border-top: 1px solid var(--aplayer-list-border-color);
 }
 .playlist-container.dont-has-music-list {
   width: 280px;
@@ -132,7 +139,7 @@ if (props.musicDataList?.length) {
   width: 280px;
   font-size: 12px;
   font-weight: 400;
-  color: var(--list-second-text-color);
+  color: var(--aplayer-list-second-text-color);
 }
 .playlist-item {
   width: calc(100% - 20px);
@@ -160,10 +167,10 @@ if (props.musicDataList?.length) {
   border-radius: 6px;
 }
 .playlist-music-title {
-  color: var(--list-primary-text-color);
+  color: var(--aplayer-list-primary-text-color);
 }
 .playlist-music-singer {
-  color: var(--list-second-text-color);
+  color: var(--aplayer-list-second-text-color);
 }
 .playlist-content {
   width: 100%;
@@ -171,7 +178,7 @@ if (props.musicDataList?.length) {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--list-border-color);
+  border-bottom: 1px solid var(--aplayer-list-border-color);
 }
 .playlist-item:last-child .playlist-content {
   border: none;
@@ -189,7 +196,7 @@ if (props.musicDataList?.length) {
 }
 
 .playlist-content-right .menu {
-  color: var(--primary-key-color);
+  color: var(--aplayer-primary-key-color);
   font-size: 28px;
   opacity: 0;
 }
@@ -202,7 +209,7 @@ if (props.musicDataList?.length) {
   right: 0;
   top: 50%;
   transform: translateY(-50%);
-  transition: var(--list-transition);
+  transition: var(--aplayer-list-transition);
   cursor: pointer;
 }
 .playlist-item:hover .menu {
@@ -213,15 +220,15 @@ if (props.musicDataList?.length) {
 }
 .playlist-content-right .durationTime {
   opacity: 1;
-  color: var(--list-second-text-color);
+  color: var(--aplayer-list-second-text-color);
 }
 
 /* play list blur or focus */
 .focus {
-  background-color: var(--primary-key-color);
+  background-color: var(--aplayer-primary-key-color);
 }
 .blur {
-  background-color: var(--second-key-color);
+  background-color: var(--aplayer-second-key-color);
 }
 .blur .playlist-content {
   border: none;
