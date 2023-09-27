@@ -6,11 +6,17 @@ export const useVolumeIcons = (
 ) => {
   const volumeValue = ref<number>(defaultVolume);
   nextTick(() => {
-    volumeRefs.value.style.setProperty("--percentage", `${volumeValue.value}%`);
+    volumeRefs.value.style.setProperty(
+      "--aplayer-volumeProgress",
+      `${volumeValue.value}%`
+    );
   });
   watch(volumeValue, async () => {
     await nextTick();
-    volumeRefs.value.style.setProperty("--percentage", `${volumeValue.value}%`);
+    volumeRefs.value.style.setProperty(
+      "--aplayer-volumeProgress",
+      `${volumeValue.value}%`
+    );
   });
   const handleVolumeIcon = computed(() => {
     let icons = "";

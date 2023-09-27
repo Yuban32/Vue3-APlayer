@@ -1,53 +1,55 @@
-* {
+.aplayer-body * {
   margin: 0;
   padding: 0;
 }
-li {
+.aplayer-body li {
   list-style: none;
 }
 
 :root {
-  --list-primary-text-color: #000000e0;
-  --list-second-text-color: #0000008f;
-  --list-border-color: #d7d7d7;
-  --primary-key-color: #d60017;
-  --second-key-color: #e3e3e3;
-  --list-transition: 150ms;
-  --pageBG: #ffffff;
-  --lyric-primary-color: #ffffffeb;
-  --lyric-second-color: #ffffffa3;
+  --aplayer-list-primary-text-color: #000000e0;
+  --aplayer-list-second-text-color: #0000008f;
+  --aplayer-list-border-color: #d7d7d7;
+  --aplayer-primary-key-color: #d60017;
+  --aplayer-second-key-color: #e3e3e3;
+  --aplayer-list-transition: 150ms;
+  --aplayer-pageBG: #ffffff;
+  --aplayer-lyric-primary-color: #ffffffeb;
+  --aplayer-lyric-second-color: #ffffffa3;
+  --aplayer-audioProgress: 0%;
+  --aplayer-volumeProgress: 0%;
 }
-a,
-blockquote,
-body,
-code,
-dd,
-div,
-dl,
-dt,
-embed,
-fieldset,
-footer,
-form,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-header,
-html,
-img,
-legend,
-li,
-ol,
-p,
-pre,
-section,
-table,
-td,
-th,
-ul {
+.aplayer-body a,
+.aplayer-body blockquote,
+.aplayer-body body,
+.aplayer-body code,
+.aplayer-body dd,
+.aplayer-body div,
+.aplayer-body dl,
+.aplayer-body dt,
+.aplayer-body embed,
+.aplayer-body fieldset,
+.aplayer-body footer,
+.aplayer-body form,
+.aplayer-body h1,
+.aplayer-body h2,
+.aplayer-body h3,
+.aplayer-body h4,
+.aplayer-body h5,
+.aplayer-body h6,
+.aplayer-body header,
+.aplayer-body html,
+.aplayer-body img,
+.aplayer-body legend,
+.aplayer-body li,
+.aplayer-body ol,
+.aplayer-body p,
+.aplayer-body pre,
+.aplayer-body section,
+.aplayer-body table,
+.aplayer-body td,
+.aplayer-body th,
+.aplayer-body ul {
   -webkit-user-drag: none;
   -webkit-user-select: none;
   -moz-user-select: none;

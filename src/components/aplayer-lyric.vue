@@ -1,6 +1,11 @@
 <template>
   <div class="aplayer-lyric-wrap">
-    <div class="bg" ref="bg"></div>
+    <div class="bg bg-1"></div>
+    <div class="bg bg-2"></div>
+    <div class="bg bg-3"></div>
+    <div class="bg bg-4"></div>
+    <div class="bg bg-5"></div>
+    <div class="bg bg-6"></div>
     <div class="close-lyric-view">
       <APlayerIcon icon="close" @click="sendCloseLyricStatus" />
     </div>
@@ -75,7 +80,7 @@
         :style="{ transform: `translateY(${liTop}px)` }"
       >
         <li
-          ref="lyricLi"
+          ref="lyricLiRef"
           v-for="(item, index) in lyricArray"
           :key="index"
           :class="{
@@ -109,7 +114,6 @@ import { parseLyricArray } from "../utils/utils";
 const props = defineProps<ICurrentMusicData>();
 const img = ref<HTMLImageElement>();
 const volumeRefs = ref();
-const bg = ref<HTMLDivElement>();
 const showLyricView = ref(true);
 const showLyricControlsView = ref(true);
 //When the screen size is less than 1000px
@@ -126,11 +130,16 @@ addEventListener("resize", () => {
     ? (showLyricView.value = false)
     : (showLyricView.value = true);
 });
-
+const changeBG = () => {
+  let bgs = document.querySelectorAll(".bg");
+  bgs.forEach((item) => {
+    (
+      item as HTMLDivElement
+    ).style.backgroundImage = `url(${props.currentMusicData.cover})`;
+  });
+};
 nextTick(() => {
-  (
-    bg.value?.style as CSSStyleDeclaration
-  ).backgroundImage = `url(${props.currentMusicData.cover})`;
+  changeBG();
 });
 const emit = defineEmits([
   "closeLyric",
@@ -146,10 +155,69 @@ const currentTime = inject<string>("currentTime");
 const durationTime = inject<string>("durationTime");
 const audioProgressValue = inject<Ref<number>>("audioProgressValue");
 const defaultVolume = inject<number>("defaultVolume");
-
+const onTimeUpdate = inject<Function>("onTimeUpdate");
+const CurrentTime = inject<Function>("CurrentTime");
+const injectPlayStatus = inject("playStatus");
 const { handleVolumeIcon, volumeValue } = useVolumeIcons(
   volumeRefs,
   defaultVolume!
+);
+const handleProgressValueInput = () => {
+  emit("updateCurrentTime", progressValue);
+};
+const { playIcons } = useChangePlayIcons(injectPlayStatus);
+
+const emitPlayStatus = () => {
+  emit("changePlayStatus", playIcons.value);
+};
+//lyric handle
+const lyricLiRef = ref<any>();
+let lyricArray = parseLyricArray(props.currentMusicData.lyric);
+const lyricIndex = ref(0);
+const liTop = ref();
+const handleLyric = () => {
+  onTimeUpdate!(() => {
+    let time = CurrentTime!();
+    for (let i = 0; i < lyricArray.length; i++) {
+      if (i == lyricArray.length - 1) {
+        lyricIndex.value = i;
+        break;
+      }
+      if (time >= lyricArray[i].time && time < lyricArray[i + 1]?.time) {
+        lyricIndex.value = i;
+
+        if (time < lyricArray[i + 1].time != undefined) {
+          lyricIndex.value = i;
+          liTop.value =
+            -lyricLiRef.value[i].offsetTop +
+            lyricLiRef.value[i].offsetHeight * 4;
+          break;
+        }
+        break;
+      }
+    }
+  });
+};
+
+const fastForward = (item: any) => {
+  let durationTime = document.querySelector("audio")!.duration;
+  let times = (item.time! / durationTime) * 100;
+  emit("updateCurrentTime", ref(times));
+};
+
+/**
+ * watch
+ */
+//if current change
+watch(
+  () => props.currentMusicData,
+  (newValue) => {
+    changeBG();
+    handleLyric();
+    lyricArray = parseLyricArray(newValue.lyric);
+    progressValue.value = 0;
+  },
+  { deep: true }
 );
 watch(volumeValue, (newValue: any) => {
   emit("updateVolume", newValue);
@@ -162,52 +230,6 @@ watch(
   },
   { deep: true }
 );
-const handleProgressValueInput = () => {
-  emit("updateCurrentTime", progressValue);
-};
-//provide inject
-const injectPlayStatus = inject("playStatus");
-const { playIcons } = useChangePlayIcons(injectPlayStatus);
-
-const emitPlayStatus = () => {
-  emit("changePlayStatus", playIcons.value);
-};
-
-//lyric handle
-const lyricLi = ref<any>();
-const lyricArray = parseLyricArray(props.currentMusicData.lyric);
-
-const lyricIndex = ref(0);
-const liTop = ref();
-const handleLyric = () => {
-  document.querySelector("audio")?.addEventListener("timeupdate", async () => {
-    let time = document.querySelector("audio")!.currentTime;
-    await nextTick();
-    for (let i = 0; i < lyricArray.length; i++) {
-      if (i == lyricArray.length - 1) {
-        lyricIndex.value = i;
-        break;
-      }
-      if (time >= lyricArray[i].time && time < lyricArray[i + 1]?.time) {
-        lyricIndex.value = i;
-
-        if (time < lyricArray[i + 1].time != undefined) {
-          liTop.value =
-            -lyricLi.value[i].offsetTop + lyricLi.value[i].offsetHeight * 4;
-        }
-        break;
-      }
-    }
-  });
-};
-
-const fastForward = (item: any) => {
-  let durationTime = document.querySelector("audio")!.duration;
-  let times = (item.time! / durationTime) * 100;
-  // console.log(times);
-
-  emit("updateCurrentTime", ref(times));
-};
 
 onMounted(() => {
   handleLyric();
@@ -243,23 +265,78 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   position: absolute;
-  filter: blur(10px);
-  background: #c7c7c7;
-  animation: BGrotate infinite 9s linear forwards;
+  filter: blur(18px) contrast(150%) brightness(120%);
+  /* background: #c7c7c7; */
+  animation: BGRotate infinite 30s linear forwards;
   background-position: center center;
-  /* background-size: 300px 300px; */
+  background-size: contain;
   background-repeat: no-repeat;
-  z-index: -1;
+  z-index: -2;
+  border-radius: 35px;
+  overflow: hidden;
 }
-@keyframes BGrotate {
+.bg::before {
+  content: "";
+  display: block;
+  position: absolute;
+  width: inherit;
+  height: inherit;
+  z-index: 1;
+  background-color: rgba(0, 0, 0, 0.397);
+}
+.bg-2 {
+  max-width: 150px;
+  max-height: 150px;
+  left: 0;
+  bottom: 0;
+  animation: BGRotateAnticlockwise infinite 9s linear forwards;
+}
+.bg-3 {
+  max-width: 150px;
+  max-height: 150px;
+  right: 0;
+  bottom: 0;
+}
+.bg-4 {
+  max-width: 150px;
+  max-height: 150px;
+  right: 0;
+  top: 0;
+  animation: BGRotateAnticlockwise infinite 7s linear forwards;
+}
+.bg-5 {
+  max-width: 150px;
+  max-height: 150px;
+  left: 0;
+  top: 0;
+}
+.bg-6 {
+  width: 120px;
+  height: 120px;
+  right: 50%;
+  top: 50%;
+  animation: BGRotateAnticlockwise infinite 10s linear forwards;
+}
+@keyframes BGRotate {
   0% {
-    transform: rotate(0deg) scale(7);
+    transform: rotate(0deg) scale(3);
   }
   50% {
-    transform: rotate(182.5deg) scale(15);
+    transform: rotate(182.5deg) scale(3);
   }
   100% {
-    transform: rotate(365deg) scale(7);
+    transform: rotate(365deg) scale(3);
+  }
+}
+@keyframes BGRotateAnticlockwise {
+  0% {
+    transform: rotate(0deg) scale(3);
+  }
+  50% {
+    transform: rotate(-182.5deg) scale(3);
+  }
+  100% {
+    transform: rotate(-365deg) scale(3);
   }
 }
 .close-lyric-view {
@@ -301,7 +378,7 @@ onMounted(() => {
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0px 5px 20px 1px #1616166e;
-  background-color: var(--lyric-primary-color);
+  background-color: var(--aplayer-aplayer-lyric-primary-color);
 }
 .lyric-controls-wrap .lyric-controls-cover-wrap img {
   aspect-ratio: auto 600 / 600;
@@ -325,10 +402,10 @@ onMounted(() => {
   text-decoration: none;
 }
 .music-title {
-  color: var(--lyric-primary-color);
+  color: var(--aplayer-lyric-primary-color);
 }
 .singer {
-  color: var(--lyric-second-color);
+  color: var(--aplayer-lyric-second-color);
 }
 
 /* icons */
@@ -345,9 +422,16 @@ onMounted(() => {
 .icon-pause {
   width: 55px;
   height: 55px;
+  fill: #ffffff;
+}
+::v-deep(.icon-play .aplayer-icon-fill, .icon-pause .aplayer-icon-fill) {
+  fill: var(--aplayer-lyric-primary-color);
+}
+::v-deep(.icon-pause .aplayer-icon-fill) {
+  fill: var(--aplayer-lyric-primary-color);
 }
 ::v-deep(.aplayer-icon-fill) {
-  fill: #ffffcc;
+  fill: var(--aplayer-lyric-second-color);
   transition: fill 0.5s;
 }
 .repeat-icons {
@@ -373,7 +457,7 @@ onMounted(() => {
   width: 100%;
   padding-top: 5px;
   font-size: 12px;
-  color: var(--lyric-second-color);
+  color: var(--aplayer-lyric-second-color);
   display: flex;
   justify-content: space-between;
 }
@@ -386,10 +470,19 @@ onMounted(() => {
   -moz-appearance: none;
   background: linear-gradient(
     to right,
-    var(--lyric-primary-color) 0%,
-    var(--lyric-primary-color) var(--percentage, 0%),
-    var(--lyric-second-color) var(--percentage, 0%),
-    var(--lyric-second-color) 100%
+    var(--aplayer-lyric-primary-color) 0%,
+    var(--aplayer-lyric-primary-color) var(--aplayer-audioProgress, 0%),
+    var(--aplayer-lyric-second-color) var(--aplayer-audioProgress, 0%),
+    var(--aplayer-lyric-second-color) 100%
+  );
+}
+.volume-progress {
+  background: linear-gradient(
+    to right,
+    var(--aplayer-lyric-primary-color) 0%,
+    var(--aplayer-lyric-primary-color) var(--aplayer-volumeProgress, 0%),
+    var(--aplayer-lyric-second-color) var(--aplayer-volumeProgress, 0%),
+    var(--aplayer-lyric-second-color) 100%
   );
 }
 .progress::-webkit-slider-thumb {
@@ -398,7 +491,7 @@ onMounted(() => {
   appearance: none;
   width: 15px;
   height: 15px;
-  background-color: var(--lyric-primary-color);
+  background-color: var(--aplayer-lyric-primary-color);
   /* border: 1px solid #fff; */
   border-radius: 50%;
   cursor: pointer;
@@ -428,7 +521,7 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  color: var(--lyric-second-color);
+  color: var(--aplayer-lyric-second-color);
   font-size: 12px;
   line-height: 1.25;
   overflow-y: auto;
@@ -462,7 +555,7 @@ onMounted(() => {
 .lyricLight {
   width: 100%;
   display: block;
-  color: var(--lyric-primary-color);
+  color: var(--aplayer-lyric-primary-color);
 }
 .hidden {
   opacity: 0;
@@ -475,7 +568,7 @@ ul {
   /* overflow-y: hidden; */
 }
 li {
-  color: var(--lyric-second-color);
+  color: var(--aplayer-lyric-second-color);
   font-size: 28px;
   white-space: pre-line;
   font-weight: 600;

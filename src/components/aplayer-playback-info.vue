@@ -69,8 +69,8 @@ watch(
 //适配Audio进度条
 watch(progressValue, async () => {
   await nextTick();
-  progressRefs.value.style.setProperty(
-    "--percentage",
+  document.body.style.setProperty(
+    "--aplayer-audioProgress",
     `${progressValue.value}%`
   );
 });
@@ -175,8 +175,8 @@ const handleProgressValueInput = () => {
   background: linear-gradient(
     to right,
     #7f7f7f 0%,
-    #7f7f7f var(--percentage, 0%),
-    #e5e5e5 var(--percentage, 0%),
+    #7f7f7f var(--aplayer-audioProgress, 0%),
+    #e5e5e5 var(--aplayer-audioProgress, 0%),
     #e5e5e5 100%
   );
   cursor: pointer;

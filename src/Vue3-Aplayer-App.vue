@@ -25,11 +25,11 @@
       <AplayerPlayListPC
         v-show="playListStatus"
         :musicDataList="musicDataList"
+        @updateCurrentPlay="handleUpdateCurrentPlay"
       />
     </Transition>
     <audio
       ref="audio"
-      @timeupdate="onTimeUpdate"
       :src="currentMusicData.musicURL"
       @play="onPlayHandler"
       @pause="onPauseHandler"
@@ -40,12 +40,13 @@
 </template>
 
 <script setup lang="ts">
-import { Ref, provide, ref } from "vue";
+import { Ref, nextTick, provide, ref } from "vue";
 import AplayerPlayBackContainer from "./components/aplayer-playback-container.vue";
 import AplayerPlayListPC from "./components/aplayer-playlist-pc.vue";
 import AplayerLyric from "./components/aplayer-lyric.vue";
 import { IMusicListData } from "./types/types";
-import { playTimeFormat } from "./utils/utils";
+// import { playTimeFormat } from "./utils/utils";
+import { useAudioEvent } from "./hooks/useAudioEvent";
 //Music Data List
 const props = defineProps<IMusicListData>();
 // Init Current Music Data
@@ -75,57 +76,22 @@ if (props.musicDataList.length == 0) {
 //audio element
 const audio: Ref<HTMLAudioElement | null> = ref(null);
 //status pause or play
-const playStatus = ref<string>("pause");
-const isEnded = ref<boolean>(false);
-const onPauseHandler = () => {
-  playStatus.value = "pause";
-};
-const onPlayHandler = () => {
-  playStatus.value = "play";
-};
-const onSeekedHandler = () => {};
-const Play = () => {
-  if (isEnded.value) {
-    //Resolve the error of the prompt DOMException: The element has no supported source after playback
-    audio.value!.src = currentMusicData.value.musicURL;
-  }
-  audio.value!.play();
-};
-const Pause = () => {
-  audio.value!.pause();
-};
-const onEnded = () => {
-  isEnded.value = true;
-};
-const updateVolume = (value: number) => {
-  audio.value!.volume = value / 100;
-};
-const currentTime = ref<string>("0 : 00");
-const durationTime = ref<string>("0 : 00");
-const audioProgressValue = ref<number>(0);
-const playTimeFormats = () => {
-  currentTime.value = playTimeFormat(CurrentTime()!);
-  audioProgressValue.value = Number(
-    ((CurrentTime()! / DurationTime()) * 100).toFixed(2)
-  );
-  durationTime.value = playTimeFormat(DurationTime());
-};
-const onTimeUpdate = () => {
-  playTimeFormats();
-};
-const CurrentTime = (time?: number) => {
-  if (time !== undefined) {
-    console.log(time);
-
-    audio.value!.currentTime = (time * DurationTime()) / 100;
-    return;
-  }
-  return audio.value!.currentTime;
-};
-const DurationTime = () => {
-  return audio.value!.duration;
-};
-
+const {
+  onPauseHandler,
+  onPlayHandler,
+  onSeekedHandler,
+  Play,
+  Pause,
+  onEnded,
+  updateVolume,
+  onTimeUpdate,
+  CurrentTime,
+  playStatus,
+  currentTime,
+  durationTime,
+  audioProgressValue,
+  resetPlayTimeFormats,
+} = useAudioEvent(audio, currentMusicData);
 const playListStatus = ref<boolean>(false);
 const aplayerLyricStatus = ref<boolean>(false);
 /**
@@ -162,14 +128,23 @@ const handleUpdateCurrentTime = (value: Ref<number>) => {
 const handleUpdateVolume = (value: string) => {
   updateVolume(Number(value));
 };
+const handleUpdateCurrentPlay = async (item: any) => {
+  await nextTick();
+  currentMusicData.value = item;
+  audioProgressValue.value = 0;
+  resetPlayTimeFormats();
+  // Play();
+};
 /**
  * provide to multiple components
  */
 provide("playStatus", playStatus);
-provide("currentTime", currentTime);
-provide("durationTime", durationTime);
+provide("currentTime", currentTime); //type:String return:mm:ss
+provide("CurrentTime", CurrentTime); //type:number return:audio currentTime
+provide("durationTime", durationTime); //type:String return:mm:ss
 provide("audioProgressValue", audioProgressValue);
 provide("defaultVolume", defaultVolume.value);
+provide("onTimeUpdate", onTimeUpdate);
 </script>
 <style scoped>
 .aplayer-body {
