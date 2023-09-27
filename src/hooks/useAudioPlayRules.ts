@@ -11,9 +11,8 @@ export const useAudioPlayRules = ({ musicDataList }: IMusicListData) => {
   const repeatFlag = ref(REPEAT.REPEAT_ALL);
 
   const handlePreviousPlay = (currentMusicData: IMusicListItems) => {
-    if (musicDataList.length == 1) {
-      useCurrentMusicData.value = musicDataList[1];
-    }
+    musicDataList.filter((item: IMusicListItems, index: Number) => {});
+
     return useCurrentMusicData;
   };
   const handleNextPlay = () => {};
