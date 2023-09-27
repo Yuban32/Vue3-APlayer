@@ -10,13 +10,16 @@ export const useAudioEvent = (
   const isEnded = ref<boolean>(false);
   const onPauseHandler = () => {
     playStatus.value = "pause";
+    isEnded.value = true;
   };
   const onPlayHandler = () => {
     playStatus.value = "play";
+    isEnded.value = false;
   };
   const onSeekedHandler = () => {};
   const Play = () => {
-    if (isEnded.value) {
+    if (CurrentTime() == DurationTime()) {
+      //playback if currentTime == duration
       //Resolve the error of the prompt DOMException: The element has no supported source after playback
       audioRef.value!.src = currentMusicData.value.musicURL;
     }

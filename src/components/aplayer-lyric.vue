@@ -422,6 +422,13 @@ onMounted(() => {
 .icon-pause {
   width: 55px;
   height: 55px;
+  fill: #ffffff;
+}
+::v-deep(.icon-play .aplayer-icon-fill, .icon-pause .aplayer-icon-fill) {
+  fill: var(--aplayer-lyric-primary-color);
+}
+::v-deep(.icon-pause .aplayer-icon-fill) {
+  fill: var(--aplayer-lyric-primary-color);
 }
 ::v-deep(.aplayer-icon-fill) {
   fill: var(--aplayer-lyric-second-color);

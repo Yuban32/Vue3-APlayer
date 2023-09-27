@@ -133,7 +133,7 @@ const handleUpdateCurrentPlay = async (item: any) => {
   currentMusicData.value = item;
   audioProgressValue.value = 0;
   resetPlayTimeFormats();
-  Play();
+  // Play();
 };
 /**
  * provide to multiple components
